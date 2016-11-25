@@ -155,7 +155,11 @@ $prompt_label   = $username . '>';
           else if (command == "rn")
           {
             rn(succeeding_string);
-          }        
+          }  
+          else if (command == "rm")
+          {
+            rm(succeeding_string);
+          }      
           else
           {
             invalid(value);
@@ -330,8 +334,40 @@ $prompt_label   = $username . '>';
       else {
         $('#screen').append('<div style="clear:both"> Usage: rn &lt;old-file-name&gt; &lt;new-file-name&gt;</div>');
       }
+    }
+
+    //Remove file/directory
+    function rm(file) {
 
 
+      $('#screen').append('<div style="clear:both">MyOS> rm ' + file + '</div>');
+
+      if (file != "") {
+
+        $.ajax({
+          type: 'POST',
+          url: '/rm.php',
+          //dataType: "html",
+          dataType: "json",
+          data: {"file": file},
+          success: function(success) {
+
+            var message;
+
+            if (success) {
+              message = "Successfully deleted file/directory";
+            } else {
+              message = "Delete failed";
+            }
+
+            $('#screen').append('<div style="clear:both">' + message + '</div>');
+          }
+          
+        });
+      }
+      else {
+        $('#screen').append('<div style="clear:both"> Please provide file to be deleted </div>');
+      }
     }
 
 
