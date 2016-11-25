@@ -1,0 +1,193 @@
+/**
+* For the brave souls who get this far: You are the chosen ones,
+* the valiant knights of programming who toil away, without rest,
+* fixing our most awful code. To you, true saviors, kings of men,
+* I say this: never gonna give you up, never gonna let you down,
+* never gonna run around and desert you. Never gonna make you cry,
+* never gonna say goodbye. Never gonna tell a lie and hurt you.
+
+OS Project by Jen Arroyo And Jill Soria
+October 2016
+*/
+/*----------initialize tags default----------*/
+body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p, blockquote, th, td {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  background: url(assets/background.jpg) no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+body {
+
+  font-family: "Lucida Console", monospace;
+  font-size: 14px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  color: #434343;
+  position: relative;
+  overflow: hidden;
+  min-width: 500px;
+}
+
+ol, ul {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+/*----------LOGIN PAGE----------*/
+
+#name {
+    margin: auto;
+    position: relative;
+    min-width: 400px;
+    text-align: center;
+    width: 40%;
+
+}
+
+#name h2 {
+    background-color: #9bf960;
+    color: #000;
+    opacity: 0.8;
+    font-size: 16px;
+    margin: 0px;
+    margin-top: 100px;
+    padding: 13px 28px;
+}
+
+#name fieldset {
+    background-color: #fff85c;
+    opacity: 0.85;
+    margin: auto;
+    padding: 20px 26px;
+    border: none;
+}
+
+#name fieldset input[type="text"] {
+    /*font-family: Comic Sans MS;*/
+    font-size: 14px;
+    margin-bottom: 20px;
+    background-color: #00d0fd;
+    color: #000;
+    padding: 8px 20px;
+    width: 300px;
+    border: none;
+}
+
+#name fieldset input[type="submit"] {
+    font-size: 14px;
+    letter-spacing: 1px;
+    background-color: #fd0099;
+    opacity: 0.8;
+    color: #fff;
+    display: block;
+    margin: auto;
+    margin-top: 15px;
+    padding: 6px 4px;
+    width: 100px;
+    border: none;
+}
+
+/*----------console margin----------*/
+.inner {
+  margin: 0 auto;
+  max-width: 1300px;
+  padding: 0 60px;
+}
+
+/*----------console toolbar design START----------*/
+.toolbar {
+  background-color: #efedee;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#efedee), to(#c1c1c1));
+  background-image: -webkit-linear-gradient(top, #efedee, #c1c1c1);
+  background-image: -moz-linear-gradient(top, #efedee, #c1c1c1);
+  background-image: -ms-linear-gradient(top, #efedee, #c1c1c1);
+  background-image: -o-linear-gradient(top, #efedee, #c1c1c1);
+  background-image: linear-gradient(top, #efedee, #c1c1c1);
+  border-radius: 3px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border: 1px solid #6287A4;
+  border-bottom: 0;
+  height: 30px;
+  margin-top: 20px;
+  position: relative;
+}
+
+.toolbar .controls {
+  left: 9px;
+  position: absolute;
+  top: 9px;
+}
+
+.toolbar .controls li {
+  float: left;
+  margin: 0 7px 0 0;
+}
+
+/*SELECTED CONTROL WITHOUT BLACK DOT*/
+.toolbar .controls li a {
+  background: url(assets/control_default.png) no-repeat;
+  display: block;
+  height: 13px;
+  width: 12px;
+}
+
+/*NOT SELECTED BUTTON WITH DOT*/
+.toolbar .controls li a.active {
+  background-image: url(assets/control_active.png);
+}
+
+.toolbar .title {
+  color: #000;
+  display: block;
+  font: 1.3em "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 30px;
+  text-align: center;
+  text-shadow: 0 1px 0 #fff;
+}
+
+/* position of console title */
+.toolbar .title-console {
+  position: relative;
+}
+/*----------console toolbar design END----------*/
+
+#screen {
+  background: #424242;
+  color: white;
+  max-height: 305px;
+  min-height: 500px;
+  overflow: auto;
+}
+
+#command {
+background: #424242;
+color: white;
+}
+
+#command-line {
+  border: none;
+  border-color: transparent;
+  background-color: #424242;
+  color: white;
+  outline: none;
+  width: 90%;
+}
+
+/*----------FOOTER----------*/
+footer {
+  padding: 1rem;
+  text-align: center;
+}
