@@ -20,7 +20,9 @@ $files = array_diff($files, array(".", ".."));
 $results = array();
 foreach ($files as $file) {
     $abs_path = $directory.$file;
+
     //$owner_info = posix_getpwuid(fileowner($abs_path));
+
     $file_info = array(
         'name' => $file,
         'size' => filesize($abs_path),

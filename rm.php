@@ -10,9 +10,16 @@ if (isset($_POST['directory'])) {
 $success = false;
 if (isset($_POST['file'])) {
 
-    $file = $_POST['file'];
-    if (file_exists($directory . $file)) {
-        $success = unlink($directory . $file);
+    $file = $directory . $_POST['file'];
+    if (file_exists($file)) {
+
+        if (is_dir($file)) {
+            $success = rmdir($file);
+        }
+        else {
+            $success = unlink($file);
+        }
+        
     }
 }
 

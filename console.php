@@ -246,53 +246,54 @@ $prompt_label   = $username . '>';
 
     function ls(directory){
 
-      /*** 
-       * @TODO: If calling ls inside a subdirectory, need to determine current directory
-       * Save current directory when doing a cd (change directory)
-       *
-       * @TODO ls with parameters ex. ls -l
-       * Restriction, current code does not accept multiple params as of yet...ata..
-       *
-       * @TODO: When creating a file. make sure to change permissions to 777
-       ***/
+          /*** 
+           * @TODO: If calling ls inside a subdirectory, need to determine current directory
+           * Save current directory when doing a cd (change directory)
+           *
+           * @TODO ls with parameters ex. ls -l
+           * Restriction, current code does not accept multiple params as of yet...ata..
+           *
+           * @TODO: When creating a file. make sure to change permissions to 777
+           ***/
 
-        console.log("directory: " + directory);
+      console.log("directory: " + directory);
 
-        //Ajax call to get list of file of current directory from server-side
-        $.ajax({
-          type: 'POST',
-          url: '/ls.php',
-          //dataType: "html",
-          dataType: "json",
-          data: {"directory": directory},
-          success: function(result) {
-            $('#screen').append('<div style="clear:both"> MyOS>ls ' + directory + '</div>');
-            //$('#screen').append("<pre>" + result + "</pre><br/>");
+      //Ajax call to get list of file of current directory from server-side
+      $.ajax({
+        type: 'POST',
+        url: '/ls.php',
+        //dataType: "html",
+        dataType: "json",
+        data: {"directory": directory},
+        success: function(result) {
+          $('#screen').append('<div> MyOS>ls ' + directory + '</div>');
+          //$('#screen').append("<pre>" + result + "</pre><br/>");
 
-            //print headers
-            var html = "<div style='clear:both'>" +
-                "<div style='float:left;width:150px'>Name</div>" +
-                //"<div style='float:left;width:150px'>Owner</div>" +
-                "<div style='float:left;width:80px'>Size</div>" +
-                "<div style='float:left;width:200px'>Created</div>" +
-                "<div style='float:left;width:200px'>Modified</div>" +
-                "</div>";
+          //print headers
+          var html = "<div style='clear:both'>" +
+              "<div style='float:left;width:150px'>Name</div>" +
+              // "<div style='float:left;width:150px'>Owner</div>" +
+              "<div style='float:left;width:80px'>Size</div>" +
+              "<div style='float:left;width:200px'>Created</div>" +
+              "<div style='float:left;width:200px'>Modified</div>" +
+              "<br /></div>";
+          $('#screen').append(html);
+
+          //print file content
+          jQuery.each(result, function(index, file) {
+            html = "<div style='clear:both'>" +
+              "<div style='float:left;width:150px'>" + file.name + "</div>" +
+              // "<div style='float:left;width:150px'>" + file.owner + "</div>" +
+              "<div style='float:left;width:80px'>" + file.size + "</div>" +
+              "<div style='float:left;width:200px'>" + file.created + "</div>" +
+              "<div style='float:left;width:200px'>" + file.modified + "</div>" +
+              "<br /></div>";
             $('#screen').append(html);
-
-            //print file content
-            jQuery.each(result, function(index, file) {
-              html = "<div style='clear:both'>" +
-                "<div style='float:left;width:150px'>" + file.name + "</div>" +
-                //"<div style='float:left;width:150px'>" + file.owner + "</div>" +
-                "<div style='float:left;width:80px'>" + file.size + "</div>" +
-                "<div style='float:left;width:200px'>" + file.created + "</div>" +
-                "<div style='float:left;width:200px'>" + file.modified + "</div>" +
-                "</div>";
-              $('#screen').append(html);
-            });
-          }
-        });
+          });
+        }
+      });
     }
+
 
     //Used to edit file name
     //@TODO: Used to edit extension
@@ -369,6 +370,7 @@ $prompt_label   = $username . '>';
         $('#screen').append('<div style="clear:both"> Please provide file to be deleted </div>');
       }
     }
+
 
 
     function current_directory(){
