@@ -151,7 +151,11 @@ $prompt_label   = $username . '>';
           else if (command == "ls")
           {
             ls(succeeding_string);
-          }          
+          }  
+          else if (command == "rn")
+          {
+            rn(succeeding_string);
+          }        
           else
           {
             invalid(value);
@@ -161,7 +165,7 @@ $prompt_label   = $username . '>';
           $("#screen").scrollTop($("#screen").height()+9000);
         }
 
-        event.stopPropagation();
+        e.stopPropagation();
         //Stop the event from propogation to other handlers
         //If this line will be removed, then keypress event handler attached at document level will also be triggered
 
@@ -258,13 +262,13 @@ $prompt_label   = $username . '>';
           dataType: "json",
           data: {"directory": directory},
           success: function(result) {
-            $('#screen').append('<div> MyOS>ls ' + directory + '</div>');
+            $('#screen').append('<div style="clear:both"> MyOS>ls ' + directory + '</div>');
             //$('#screen').append("<pre>" + result + "</pre><br/>");
 
             //print headers
             var html = "<div style='clear:both'>" +
                 "<div style='float:left;width:150px'>Name</div>" +
-                "<div style='float:left;width:150px'>Owner</div>" +
+                //"<div style='float:left;width:150px'>Owner</div>" +
                 "<div style='float:left;width:80px'>Size</div>" +
                 "<div style='float:left;width:200px'>Created</div>" +
                 "<div style='float:left;width:200px'>Modified</div>" +
@@ -275,7 +279,7 @@ $prompt_label   = $username . '>';
             jQuery.each(result, function(index, file) {
               html = "<div style='clear:both'>" +
                 "<div style='float:left;width:150px'>" + file.name + "</div>" +
-                "<div style='float:left;width:150px'>" + file.owner + "</div>" +
+                //"<div style='float:left;width:150px'>" + file.owner + "</div>" +
                 "<div style='float:left;width:80px'>" + file.size + "</div>" +
                 "<div style='float:left;width:200px'>" + file.created + "</div>" +
                 "<div style='float:left;width:200px'>" + file.modified + "</div>" +
@@ -284,7 +288,51 @@ $prompt_label   = $username . '>';
             });
           }
         });
+    }
+
+    //Used to edit file name
+    //@TODO: Used to edit extension
+    //@TODO: Used to move the file
+    function rn(arguments) {
+
+      var files = arguments.split(" "),
+        new_file,
+        old_file;
+
+      $('#screen').append('<div style="clear:both">MyOS> rn ' + arguments + '</div>');
+
+      if (files.length == 2) {
+
+        $.ajax({
+          type: 'POST',
+          url: '/rn.php',
+          //dataType: "html",
+          dataType: "json",
+          data: {
+            "old_file": files[0],
+            "new_file": files[1]
+          },
+          success: function(success) {
+
+            var message;
+
+            if (success) {
+              message = "Successfully renamed file/directory";
+            } else {
+              message = "Rename file/directory failed";
+            }
+
+            $('#screen').append('<div style="clear:both">' + message + '</div>');
+          }
+          
+        });
       }
+      else {
+        $('#screen').append('<div style="clear:both"> Usage: rn &lt;old-file-name&gt; &lt;new-file-name&gt;</div>');
+      }
+
+
+    }
 
 
     function current_directory(){
