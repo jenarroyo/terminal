@@ -72,6 +72,11 @@ $prompt_label   = $username . '>';
 
   <!-- START OF SCRIPT, THIS IS WHERE THE MAGIC HAPPENS -->
   <script>
+
+    var root_directory = '',
+      current_directory = root_directory,
+      display_directory = '';
+
     // Always focus on the commandline
     $(document).ready(function()
     {
@@ -150,7 +155,7 @@ $prompt_label   = $username . '>';
           }
           else if (command == "ls")
           {
-            ls(succeeding_string);
+            ls();
           }  
           else if (command == "rn")
           {
@@ -159,7 +164,11 @@ $prompt_label   = $username . '>';
           else if (command == "rm")
           {
             rm(succeeding_string);
-          }      
+          }  
+          else if (command == "cd")
+          {
+            cd(succeeding_string);
+          }     
           else
           {
             invalid(value);
@@ -244,7 +253,34 @@ $prompt_label   = $username . '>';
     
     // ADDITIONAL FUNCTIONS FOR MP02
 
-    function ls(directory){
+    function setCurrentDirectory(directory) {
+      
+      if (directory != "..") {
+        //Subdirectory
+        if (directory != root_directory) {
+          current_directory += directory + "/";
+          display_directory = directory;
+        }
+        else {
+          //Root directory
+          current_directory = root_directory;
+          display_directory = "";
+        }
+      }
+      else{
+        //Move one folder up
+        var folders = current_directory.split("/");
+        folders.splice(-2, 2);
+        display_directory = folders.slice(-1,1);
+        current_directory = folders.join("/");
+      }
+      
+    }
+
+    function ls(){
+
+      var directory = current_directory;
+      
 
           /*** 
            * @TODO: If calling ls inside a subdirectory, need to determine current directory
@@ -256,8 +292,6 @@ $prompt_label   = $username . '>';
            * @TODO: When creating a file. make sure to change permissions to 777
            ***/
 
-      console.log("directory: " + directory);
-
       //Ajax call to get list of file of current directory from server-side
       $.ajax({
         type: 'POST',
@@ -266,7 +300,7 @@ $prompt_label   = $username . '>';
         dataType: "json",
         data: {"directory": directory},
         success: function(result) {
-          $('#screen').append('<div> MyOS>ls ' + directory + '</div>');
+          $('#screen').append('<div> MyOS ' + display_directory + '>ls ' + directory + '</div>');
           //$('#screen').append("<pre>" + result + "</pre><br/>");
 
           //print headers
@@ -304,7 +338,7 @@ $prompt_label   = $username . '>';
         new_file,
         old_file;
 
-      $('#screen').append('<div style="clear:both">MyOS> rn ' + arguments + '</div>');
+      $('#screen').append('<div style="clear:both">MyOS ' + display_directory + '> rn ' + arguments + '</div>');
 
       if (files.length == 2) {
 
@@ -341,7 +375,7 @@ $prompt_label   = $username . '>';
     function rm(file) {
 
 
-      $('#screen').append('<div style="clear:both">MyOS> rm ' + file + '</div>');
+      $('#screen').append('<div style="clear:both">MyOS ' + display_directory + '> rm ' + file + '</div>');
 
       if (file != "") {
 
@@ -369,6 +403,33 @@ $prompt_label   = $username . '>';
       else {
         $('#screen').append('<div style="clear:both"> Please provide file to be deleted </div>');
       }
+    }
+
+    function cd(directory){
+
+      $('#screen').append('<div style="clear:both">MyOS ' + display_directory + '> cd ' + directory + '</div>');
+      $.ajax({
+          type: 'POST',
+          url: '/cd.php',
+          //dataType: "html",
+          dataType: "json",
+          data: {"file": directory},
+          success: function(success) {
+
+            var message;
+
+            if (!success) {
+              message = directory + " is not a directory";
+              $('#screen').append('<div style="clear:both">' + message + '</div>');
+            } 
+            else {
+              setCurrentDirectory(directory);
+            }
+
+            
+          }
+          
+        });
     }
 
 
