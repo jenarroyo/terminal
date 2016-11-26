@@ -73,9 +73,13 @@ $prompt_label   = $username . '>';
   <!-- START OF SCRIPT, THIS IS WHERE THE MAGIC HAPPENS -->
   <script>
 
-    var root_directory = '',
-      current_directory = root_directory,
-      display_directory = '';
+    var root_directory = '', //fixed
+      current_directory = root_directory, //set the root directory as current directory
+      display_directory = ''; //for string version of current directory?
+
+    //var root_directory = "C:\\xampp\\htdocs\\terminal-master\\file_directory";
+    // var current_directory = root_directory;
+    // var display_directory = "C:\\xampp\\htdocs\\terminal-master\\file_directory\>";
 
     // Always focus on the commandline
     $(document).ready(function()
@@ -107,75 +111,71 @@ $prompt_label   = $username . '>';
 
           // get first word = command, and succeeding string
           // get the index of the first "space" after the first word which is our command
-         if (space_index > 0)
-          {
-            command = value.substring(0, space_index);
-            succeeding_string = value.slice(space_index + 1);
+         if (space_index > 0) {
+            command = value.substring(0, space_index); //gets the first string
+            succeeding_string = value.slice(space_index + 1); //gets the second string
           }
-          else
-          {
-            command = value;
+          else {
+            command = value; //if no space found, gets all input
           }
 
-          if (command == "")
-          {
-            $("#screen").append($('<div>').text("<?php echo $prompt_label;?>").prepend($('</div>')));
+          if (command == "") {
+            //if the user pressed enter, just show the prompt label
+            $("#screen").append($('<div>').text("<?php echo $prompt_label;?>").prepend($('</div>'))); 
           }
-          else if (command == "say")
-          {
+          else if (command == "say") {
             command_say(value, succeeding_string);
           }
-          else if (command == "marquee")
-          {
+          else if (command == "marquee") {
             command_marquee(value, succeeding_string);
           }
-          else if (command == "cls")
-          {
+          else if (command == "cls") {
             command_clear();
           }
-          else if (command == "date")
-          {
+          else if (command == "date") {
             command_date(value);
           }
-          else if (command == "time")
-          {
+          else if (command == "time") {
             command_time(value);
           }
-          else if (command == "datetime")
-          {
+          else if (command == "datetime") {
             command_datetime(value);
           }
-          else if (command == "help")
-          {
+          else if (command == "help") {
             command_help(value);
           }
-          else if (command == "exit")
-          {
+          else if (command == "exit") {
             command_exit();
           }
-          else if (command == "ls")
-          {
-            ls();
+          else if (command == "ls") {//to show list of files
+              if(succeeding_string.length>0){
+                  invalid(value); //invalid command
+              }
+              else{
+                ls();               
+              }
           }  
-          else if (command == "rn")
-          {
+          else if (command == "rn") {//to rename a file
             rn(succeeding_string);
           }  
-          else if (command == "rm")
-          {
+          else if (command == "rm") {// to remove a file
             rm(succeeding_string);
           }  
-          else if (command == "cd")
-          {
+          else if (command == "cd") {//to change directory
             cd(succeeding_string);
-          }     
-          else
-          {
-            invalid(value);
+          }
+          else if (command == "mv") {//to move files
+            mv(succeeding_string);
+          }  
+          else if (command == "cp") {//to copy a file
+            cp(succeeding_string);
+          }       
+          else {
+            invalid(value); //invalid command
           };
 
-          $(this).val(''); //clear textbox
-          $("#screen").scrollTop($("#screen").height()+9000);
+          $(this).val(''); //clear textbox after the user presses enter
+          $("#screen").scrollTop($("#screen").height()+9000); //makes the screen focus on the latest line
         }
 
         e.stopPropagation();
@@ -191,7 +191,7 @@ $prompt_label   = $username . '>';
 
     function command_say(value, succeeding_string) {
       // say <string with spaces> = display the string in a new line
-      $('#screen').append($('<div>').text("<?php echo $prompt_label;?>" + value).append($('</div><br/><div>' + succeeding_string + '</div>')));
+      $('#screen').append($('<div>').text("<?php echo $prompt_label;?>" + value).append($('</div><br/><div>' + succeeding_string + '</div>'))); //? br for what?
     }
 
     function command_marquee(value, succeeding_string) {
@@ -201,27 +201,90 @@ $prompt_label   = $username . '>';
       $('#screen').append($('<div>').text("<?php echo $prompt_label;?>" + value).append($('</div><br/><marquee direction="right">' + succeeding_string + '</marquee>')));
     }
 
-    function command_help(value) {
-      $('#screen').append($('<div>').text("<?php echo $prompt_label;?>" + value).append($('</div><br/><div>').html("Here are the list of valid commands you can use.<br/><br/> cls &emsp;&emsp;&emsp;&emsp;-clear the entire screen.<br/> date &emsp;&emsp;&emsp; -displays current date. <br/> datetime&emsp; -displays current datetime. <br/> marquee&emsp;&emsp;-display scrolling string that will move from right to left. <br/> say&emsp;&emsp;&emsp;&emsp; -display the string in a new line.<br/>time&emsp;&emsp;&emsp; -displays current time. <br/>exit&emsp;&emsp;&emsp; -exit console, back to login page.")));
+    function commandMetadata(command, syntax, description, sample) {
+      this.commandName = command;
+      this.syntax = syntax;
+      this.description = description;
+      this.sample = sample;
     }
 
-    function command_date(value) {
+    //initialization for commands
+    var commandsList = []; // array for commands
+
+    var changedir = new commandMetadata("cd", "cd directory", "changes the current directory to desired directory.", "cd directory1");
+    var clrscrn = new commandMetadata("cls", "as is", "clears the entire screen.", "cls");
+    var copy = new commandMetadata("cp", "cp filename, directory", "copies the file to the directory", "cp filename, directory");
+    var showDate = new commandMetadata("date", "as is", "displays current date. ", "date");
+    var showDatetime = new commandMetadata("datetime", "as is", "displays current datetime. ", "datetime");
+    var editFileContent = new commandMetadata("edit", "edit filename", "edits the content of the file.", "edit filename");
+    var showList = new commandMetadata("ls", "as is", "displays all files in the current directory.", "ls");
+    var marqueeSomething = new commandMetadata("marquee  ", "marquee input", "display scrolling string that will move from right to left. ", "marquee any");
+    var moveFile = new commandMetadata("mv", "mv filename, directory", "move file to the desired directory", "mv filename, directory");
+    var removeFile = new commandMetadata("rm", "rm filename", "removes or deletes the file.", "rm filename");
+    var renameFile = new commandMetadata("rn", "rn oldfile newfile", "renames the file.", "rn oldfile newfile");
+    var saySomething = new commandMetadata("say", "say any", "display the string in a new line.", "say any");
+    var showTime = new commandMetadata("time", "as is", "displays current time. ", "time");
+    var quit = new commandMetadata("exit", "as is", "exit console, back to login page.", "exit");
+
+    //populate commandsList
+    commandsList.push(changedir);
+    commandsList.push(clrscrn);
+    commandsList.push(copy);
+    commandsList.push(showDate);
+    commandsList.push(showDatetime);
+    commandsList.push(editFileContent);
+    commandsList.push(showList);
+    commandsList.push(marqueeSomething  );
+    commandsList.push(moveFile);
+    commandsList.push(removeFile);
+    commandsList.push(renameFile);
+    commandsList.push(saySomething);
+    commandsList.push(showTime);
+    commandsList.push(quit);
+
+
+    function command_help(value) {
+      //display the list of commands for the user to use
+      $('#screen').append('<div> <?php echo $prompt_label;?>' + 'help ' + '</div>');
+      
+      //print headers
+      var html = "<div style='clear:both'>" +
+              "<div style='float:left;width:100px'>Command</div>" +
+              "<div style='float:left;width:250px'>Syntax</div>" +
+              "<div style='float:left;width:500px'>Description</div>" +
+              "<div style='float:left;width:200px'>Sample Code</div>" +
+              "<br /></div>";
+          $('#screen').append(html);
+
+      //print commands
+      jQuery.each(commandsList, function(index, command) {
+        html = "<div style='clear:both'>" +
+          "<div style='float:left;width:100px'>" + command.commandName + "</div>" +
+          "<div style='float:left;width:250px'>" + command.syntax + "</div>" +
+          "<div style='float:left;width:500px'>" + command.description + "</div>" +
+          "<div style='float:left;width:200px'>" + command.sample + "</div>" +
+          "<br /></div>";
+        $('#screen').append(html);
+      });
+    }
+
+    function command_date(value) { //displays the date
       var d = new Date();
       $('#screen').append($('<div>').text("<?php echo $prompt_label;?>" + value).append($('</div><br/><div>' + d.toDateString() + ' </div>')));
     }
 
-    function command_time(value) {
+    function command_time(value) { //displays the time
       var time_string = make_time();
       $('#screen').append($('<div>').text("<?php echo $prompt_label;?>" + value).append($('</div><br/><div>' + time_string + '</div>')));
     }
 
-    function command_datetime(value) {
+    function command_datetime(value) { //displays the datetime
       var time_string = make_time();
       var d = new Date();
       $('#screen').append($('<div>').text("<?php echo $prompt_label;?>" + value).append($('</div><br/><div>' + d.toDateString() + ' ' + time_string + ' </div>')));
     }
 
-    function command_exit() {
+    function command_exit() { //shows the login page
       window.location.href = 'index.php';
     }
 
@@ -264,7 +327,11 @@ $prompt_label   = $username . '>';
         else {
           //Root directory
           current_directory = root_directory;
-          display_directory = "";
+          display_directory = ""; //orig
+
+          //code below reflects actual terminal behavior
+          //display_directory = "C:\\xampp\\htdocs\\terminal-master\\file_directory";
+
         }
       }
       else{
@@ -279,7 +346,7 @@ $prompt_label   = $username . '>';
 
     function ls(){
 
-      var directory = current_directory;
+      var directory = current_directory; //transfer current directory to directory variable
       
 
           /*** 
@@ -295,12 +362,12 @@ $prompt_label   = $username . '>';
       //Ajax call to get list of file of current directory from server-side
       $.ajax({
         type: 'POST',
-        url: '/ls.php',
+        url: '/terminal-master/ls.php',
         //dataType: "html",
         dataType: "json",
         data: {"directory": directory},
         success: function(result) {
-          $('#screen').append('<div> MyOS ' + display_directory + '>ls ' + directory + '</div>');
+          $('#screen').append('<div> <?php echo $prompt_label;?>' + display_directory + '>ls ' + directory + '</div>');
           //$('#screen').append("<pre>" + result + "</pre><br/>");
 
           //print headers
@@ -338,13 +405,16 @@ $prompt_label   = $username . '>';
         new_file,
         old_file;
 
-      $('#screen').append('<div style="clear:both">MyOS ' + display_directory + '> rn ' + arguments + '</div>');
+        console.log(files[0]); //old
+        console.log(files[1]); //new
+        console.log(files[2]); //undefined
 
+      $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '>rn ' + arguments + '</div>');
       if (files.length == 2) {
 
         $.ajax({
           type: 'POST',
-          url: '/rn.php',
+          url: '/terminal-master/rn.php',
           //dataType: "html",
           dataType: "json",
           data: {
@@ -374,14 +444,13 @@ $prompt_label   = $username . '>';
     //Remove file/directory
     function rm(file) {
 
-
-      $('#screen').append('<div style="clear:both">MyOS ' + display_directory + '> rm ' + file + '</div>');
+      $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '>rm ' + file + '</div>');
 
       if (file != "") {
 
         $.ajax({
           type: 'POST',
-          url: '/rm.php',
+          url: '/terminal-master/rm.php',
           //dataType: "html",
           dataType: "json",
           data: {"file": file},
@@ -407,10 +476,10 @@ $prompt_label   = $username . '>';
 
     function cd(directory){
 
-      $('#screen').append('<div style="clear:both">MyOS ' + display_directory + '> cd ' + directory + '</div>');
+      $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?>' + display_directory + '>cd ' + directory + '</div>');
       $.ajax({
           type: 'POST',
-          url: '/cd.php',
+          url: '/terminal-master/cd.php',
           //dataType: "html",
           dataType: "json",
           data: {"file": directory},
@@ -430,6 +499,15 @@ $prompt_label   = $username . '>';
           }
           
         });
+    }
+
+    function cp(file, directory) {
+      $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '> cp ' + directory + '</div>');
+    }
+
+
+    function mv(file, directory) {
+      $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '> mv ' + directory + '</div>');
     }
 
 
@@ -478,17 +556,12 @@ $prompt_label   = $username . '>';
 
     }
 
-    function copy_file_new_directory(){
-
+    function copy_file(file, directory){
+        // The File manager should be able to duplicate a file in the same directory 
+      // and the name would immediately have a (1) or (2) or “Copy of” prefix.
     }
 
     function delete_file(){
-
-    }
-
-    function duplicate_file(){
-      // The File manager should be able to duplicate a file in the same directory 
-      // and the name would immediately have a (1) or (2) or “Copy of” prefix.
 
     }
 
@@ -496,6 +569,7 @@ $prompt_label   = $username . '>';
 
     }
 
+    
     </script>
 
 <!--     // ADDITIONAL FUNCTIONS FOR FINAL PROJECT
@@ -526,6 +600,35 @@ $prompt_label   = $username . '>';
    //      (learn more from here: www.ccsf.edu/Pub/Fac/vi.html ). Upon editing, the updated date modified and file size 
    //       should be seen when the contents of the directory are being displayed. 
     // V. (Extra Credit) The File manager should be able to duplicate a file in the same directory and the name would immediately have a (1) or (2) or “Copy of” prefix. -->
+
+
+<!--
+Dev notes:
+
+Accomplishments ao 11/26/2016:
+1. Enhanced the ls function to handle ls + succeeding word = invalid command
+
+2. Changed the myOS to prompt in the different methods in screen append
+
+3.added the ff empty functions:
+  mv - move
+  cp - copy
+
+4. improved the output of the help function by:
+  adding an array to which the display will loop thru, created a commandmetadata class and instantiated several commands. put them on the array commandList created.
+
+For improvements:
+dynamic prompt to reflect current directory -> entails changes in processing the directory
+
+error in cd: going in a subfolder
+
+not working functions for windows:
+rename
+remove
+
+
+ -->
+
 </body>
 </html>
 
