@@ -13,6 +13,11 @@ October 2016
 
 <?php
 
+include 'ChromePhp.php';
+ChromePhp::log('Hello console!'); //sample
+ChromePhp::log($_SERVER); //sample
+ChromePhp::warn('something went wrong!'); //sample
+
 if(isset($_GET['username']))
 {
     $username = urldecode($_GET['username']);
@@ -28,6 +33,8 @@ $terminal_label = $username . "'s Terminal";
 $prompt_label   = $username . '>';
 
 ?>
+
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -79,6 +86,10 @@ $prompt_label   = $username . '>';
     var root_directory = '', //fixed
       current_directory = root_directory, //set the root directory as current directory
       display_directory = ''; //for string version of current directory?
+
+    //var root_directory = "C:\\xampp\\htdocs\\terminal-master\\file_directory";
+    // var current_directory = root_directory;
+    // var display_directory = "C:\\xampp\\htdocs\\terminal-master\\file_directory\>";
 
     // Always focus on the commandline
     $(document).ready(function()
@@ -328,6 +339,9 @@ $prompt_label   = $username . '>';
           current_directory = root_directory;
           display_directory = ""; //orig
 
+          //code below reflects actual terminal behavior
+          //display_directory = "C:\\xampp\\htdocs\\terminal-master\\file_directory";
+
         }
       }
       else{
@@ -338,6 +352,10 @@ $prompt_label   = $username . '>';
         current_directory = folders.join("/");
       }
       
+    }
+
+    function getUsedLocalStorageSpace() {
+      return Object.keys(window.localStorage).map(function(key) { return localStorage[key].length;}).reduce(function(a,b) { return a+b;});
     }
 
     function ls(){
@@ -375,10 +393,12 @@ $prompt_label   = $username . '>';
               "<div style='float:left;width:80px'>%</div>" +
               "<div style='float:left;width:200px'>Created</div>" +
               "<div style='float:left;width:200px'>Modified</div>" +
-              "<br /></div>";
+              "</div>";
           $('#screen').append(html);
 
           var contentCount = 0 ;
+          var diskTotalSpace = 0;
+          var diskFreeSpace = 0;
           //print file content
           jQuery.each(result, function(index, file) 
           {
@@ -389,15 +409,17 @@ $prompt_label   = $username . '>';
               "<div style='float:left;width:80px'>" + file.percentage + "</div>" +
               "<div style='float:left;width:200px'>" + file.created + "</div>" +
               "<div style='float:left;width:200px'>" + file.modified + "</div>" +
-              "<br /></div>" ;
+              "</div>";
             $('#screen').append(html);
 
             contentCount++;
-          });
-          //to display disk size
-          var diskSize = "<div style='float:left;width:150px'>&nbsp;</div><div align=left style='float:left;width:500px'>" + contentCount + " Item(s) <br />" + 
-            1 + " bytes used <br />" +
-            9 + " bytes free <br />"+ "</div>";
+            diskTotalSpace = file.diskTotalSpace;
+            diskFreeSpace = file.diskFreeSpace;
+          }); //jQuery Each
+
+      
+          var diskSize = "<div style='float:left;width:150px'>&nbsp;</div><div align=left style='float:left;width:500px'> <div>" + contentCount + " Item(s) </div> <div> " + diskTotalSpace + " bytes used </div><div>" + diskFreeSpace + " bytes free </div>" +
+            "</div>";
           $('#screen').append(diskSize);
         }
       });
@@ -456,6 +478,7 @@ $prompt_label   = $username . '>';
 
       if (file != "") 
       {
+        console.log(file); //file2.txt
 
         $.ajax({
           type: 'POST',
@@ -473,7 +496,7 @@ $prompt_label   = $username . '>';
             } 
             else 
             {
-              message = "File does not exist! Delete failed";
+              message = "Delete failed";
             }
 
             $('#screen').append('<div style="clear:both">' + message + '</div>');
@@ -613,6 +636,7 @@ $prompt_label   = $username . '>';
    //      (learn more from here: www.ccsf.edu/Pub/Fac/vi.html ). Upon editing, the updated date modified and file size 
    //       should be seen when the contents of the directory are being displayed. 
     // V. (Extra Credit) The File manager should be able to duplicate a file in the same directory and the name would immediately have a (1) or (2) or “Copy of” prefix. -->
+
 
 </body>
 </html>

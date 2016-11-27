@@ -1,7 +1,4 @@
 <?php
-//added this function:  get file size unit
-//renamed the root file_directory to --> root_directory to be more descriptive.
-//added percentage of file computation
 
 function getFileSizeUnit($number) {
     $fileSize = $number;
@@ -41,6 +38,14 @@ $files = scandir($directory);
 $files = array_diff($files, array(".", ".."));
 
 
+//Additional attributes
+$diskTotalSpace = getFileSizeUnit(disk_total_space($directory));
+
+$diskFreeSpace = getFileSizeUnit(disk_free_space ($directory));
+
+$diskUsedSpace = $diskTotalSpace - $diskFreeSpace;
+
+
 //BONUS: Get additional info
 $results = array();
 foreach ($files as $file) {
@@ -56,14 +61,12 @@ foreach ($files as $file) {
         'created' => date("Y-m-d H:i:s", filectime($abs_path)),
         'modified' => date("Y-m-d H:i:s", filemtime($abs_path)),
         //'owner' => $owner_info['name']
+        'diskTotalSpace' => $diskTotalSpace,
+        'diskFreeSpace' => $diskFreeSpace
     );
 
     $results[] = $file_info;
 }
 
 echo json_encode($results);
-
-
-
-
 
