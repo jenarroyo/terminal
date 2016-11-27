@@ -1,23 +1,32 @@
 <?php
+//renamed the root file_directory to --> root_directory to be more descriptive.
 
 //Set directory
-$directory = dirname(__FILE__) . "/file_directory/";
+$directory = dirname(__FILE__) . "/root_directory/";
+
 if (isset($_POST['directory'])) {
-    $directory .= $_POST['directory'];
+    $directory .= "dir 2/" . $_POST['directory'];
 }
 
-
 $success = false;
-if (isset($_POST['file'])) {
 
-    $file = $directory . $_POST['file'];
-    if (file_exists($file)) {
+if (isset($_POST['file'])) 
+{
+    //get the "file" from the directory
+    $file = $directory . $_POST['file']; //add the last part to the directory
 
-        if (is_dir($file)) {
-            $success = rmdir($file);
+    if (file_exists($file)) 
+    {
+        //is the file a directory?
+        if (is_dir($file)) 
+        { 
+            //remove directory or folder
+            $success = rmdir($file); 
         }
-        else {
-            $success = unlink($file);
+        else 
+        {
+            //remove file itself
+            $success = unlink($file); 
         }
         
     }

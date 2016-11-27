@@ -1,7 +1,8 @@
 <?php
+//renamed the root file_directory to --> root_directory to be more descriptive.
 
 //Set directory
-$directory = dirname(__FILE__) . "/file_directory/";
+$directory = dirname(__FILE__) . "/root_directory/";
 if (isset($_POST['directory'])) {
     $directory .= $_POST['directory'];
 }

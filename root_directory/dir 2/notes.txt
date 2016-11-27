@@ -1,0 +1,546 @@
+NOTES per READING
+I.	System Deadlocks by 3 authors
+1 INTRODUCTION
+•	Development Objectives in OS? improve utilization of system resources by distributing them among many concurrently executing tasks.
+•	Deadlock? tasks are unable to proceed
+•	DEADLOCKS?Deadly embraces as per EWD
+o	Can arise even though no single task required more than the total resources available in the system. (process is waiting for a release of a resource currently held by others and vv)
+o	Can arise whether the allocation of resources is responsibility of OS or programs.
+•	Resources? not limited to devices and processors and storage media but also includes programs, subroutines and data. Many of which only permit exclusive use by one task at a time but some can be shared
+•	Possibility of pre-emption: seize the resource from an ongoing task with some cost (e.g loss of progress). Storage media type of resources is however non pre-emptible.
+•	Users of system may request for resources implicitly or explicitly during execution of a program
+•	A request from a resource may imply a further request for other resources.
+•	Deadlock ? logical problem. Becomes more complex when there are different resource types.
+2 CHARACTERIZATIONS OF DEADLOCKS
+•	A point in a progress space defines the progress of a task with respect to time
+•	Deadlock situation operatives (Conditions that defines a state of deadlock)
+o	Mutual Exclusion: Tasks have exclusive control of their required resources
+o	Wait For: Tasks holds resources already allocated to them while waiting for additional resources
+o	No Pre-emption: Resources cannot be forcibly removed from the tasks holding them unless they are used to completion
+o	Circular wait: Circular chain of tasks exists? each tasks holds one or more resources that are being requested by the next task in chain.
+•	Traffic deadlock:
+o	Spaces: Only one resource of each type; distinguishable from each other
+o	Cars: Tasks
+o	Mutex: a space cannot be shared by 2 or more cars.
+o	Wait for: a car cannot release the current space until it gets the next space
+o	No Pre-emption: holds assuming that cars are not removable by an outside agent
+o	Circuits in the state graph are possible because of the direction of flow around the square.
+•	Deadlocks can be expressed in terms of graphs
+o	T: set of Tasks
+o	R: set of distinct Resources (one resource of each type)
+•	Directed Graph = State Graph
+o	Nodes?resources
+o	Arcs: a task processing R1 and requesting R2
+o	A circuit / directed loop is a necessary and sufficient condition for a deadlock
+?	Assuming first 3 conditions are operative.
+o	Only appropriate for systems where there is only one resource of a type
+o	For more resources of same type:
+?	Resources are partitioned into types (identical and indistinguishable): r1, r2, rs
+?	Number of resources of each type given: w1, w1, ws
+?	Assumed: requests for a given resource type ri can be for any number less than or equal to wi
+?	Nodes are the resource types [ri]
+?	A circuit is necessary but no longer a sufficient condition for the existence of deadlock? meaningful in considering the prevention of deadlocks: restriction is imposed on the behavior of tasks in such a way that circuits in the request graph cannot arise
+3 PREVENTION OF DEADLOCK 
+•	If we want to prevent a deadlock, we must ensure that at every point in time at least one of the necessary conditions is not satisfied.
+•	Implies that certain constraints on the way in which requests for resources may be made (last 3 is suggested by Havender)
+o	Mutex: cannot be denied for all resources (e.g. sharing of a file by more than one task is only permitted when no task is updating the contents of that file
+o	Wait For: each task must request all its required resources at once and cannot proceed until all have been granted
+o	No Pre empt: if a task holding certain resources is denied a further request, that task must release its original resource and request them again with all its required resources
+o	Circuit: impose a linear ordering of resource types on all tasks: if a task has been allocated resources of type ri, it may subsequently request only those resource types following ri.
+•	Can implement above partially or combination; by embodying these constraints in the design of system; by insisting that all application programs and system components follow certain conventions in requesting resources.
+•	Repercussions of condition denial
+o	Mutex: nothing mentioned
+o	Wait For: costly since some of the resources allocated to a task may remain unused for long periods.
+o	No Pre empt: convenient only when applied to pre-emptible resources whose state can be easily saved and restored later (e.g. processor)
+o	Circuit: feasible
+o	Note: However, the possibility of deadlock between several tasks initiated by one or more job-steps has not been prevented completely, since the ENQ and DEQ facilities can be used (or misused) to create a "circular wait."
+4 DEADLOCK DETECTION AND RECOVERY
+•	For a state graph with one resource of a type:
+o	NOTE: Deadlock is present when there is a circuit in state graph
+o	Deadlock detection mechanism consists of 1) a routine for maintaining a state graph each time resources are requested, acquired or released by tasks and 2) a routine that examines the state graph to determine whether a circuit exists
+•	For a state graph with more than one resource of a type:
+o	NOTE: Deadlock MAY BE present when there is a circuit in state graph
+o	Deadlock detection:
+?	Resources are partitioned into types (identical and indistinguishable): r1, r2, rs
+?	Number of resources of each type given: w1, w1, ws
+?	Time instant t
+?	Pij? denote the number of resource of type rj allocated to / possessed by T1
+?	Qij?denote the number of resource of type rj requested by T1 in excess of those already allocated to T1.
+?	P = Allocation (already got hold of); Q = requests (Max Needs)
+?	V? available resources vector whose ith element indicates the number of resources of type ri that are currently available
+•	Vj = Wj – sum of Pij
+o	Not same with state graph mechanism above
+•	Algorithm for detecting deadlock (reveal): A
+o	Accounting all possibilities of sequencing the tasks that remain to be completed
+o	Initialize all W from V(t) = All available count of resources (V) must equal to number of resources per type (W)
+o	Mark all rows for which Pi(t) =0 (All rows are assumed to be unmarked at the outset) = Note of all tasks that have no allocation yet
+o	Search for an unmarked row where Qi(t) <= W. If found, Set W = W+Pi(t) and mark it then repeat this step = Look for a task there its requirements / needs can be met. If found, then make that task be fulfilled; then add the tasks’ initially held resources to the available resources
+o	If not found, terminate.
+o	A deadlock exists if and only if there are unmarked rows at the termination of the algorithm = no tasks requirements can be fulfilled. These set of unmarked rows corresponds to the set of deadlocked tasks.
+o	Running time: square of the number of tasks.
+o	By ordering the resource requests by type and associating with each task a count of the number of types of resources requested = running time can vary linearly with the number of tasks.
+o	Additional cost of ordering requests and maintaining counts  = offset: facilitates finding blocked tasks to activate when other tasks release resources.
+•	Simplest approach to recovery: aborting each of the deadlock tasks; or aborting them in sequence until sufficient resources become released to remove deadlocks in the set of remaining task.
+•	Can design an algo that searches for a minimum sized set of tasks which, if aborted, would remove the deadlocks.
+•	General technique:
+o	Assign fixed cost to the removal of a resource from a deadlocked task
+•	Algo has been designed that finds a subset of resources that would incur the minimum cost if preempted
+o	Finds a minimum cost solution
+o	Tree-search procedure
+o	Branch and bound technique
+•	This Detection and recovery mechanisms can be extended to include resource types which are actually preemptible but have varying preemption costs
+•	Deadlocks do not necessarily involve tasks that must be aborted; it may be necessary to remove certain resources from tasks
+•	Forced resource preemption involves losses = can be assigned higher costs so that recovery algo will avoid them
+5 AVOIDING DEADLOCKS USING INFORMATION ON RESOURCE REQUIREMENTS
+•	Usually necessary to have some advance info on the resource usage of tasks.
+•	2 Models are discussed
+•	A. Basic Model: Full Information assumed
+o	A task is assumed to consist of a sequence of task steps during each of which the resource usage of the task remains constant.
+o	Execution of a task step first involved the acquisition of those resources needed by the given task-step but not passed on by the previous task step
+o	A period of execution during which the resource requirements do not change.
+o	At the completion of execution, all those resources not needed are released and returned to a pool of available resources.
+•	SAFE STATE Concept
+•	State of a system can be reflected in the matrices of request and allocation of resources at time t
+•	S(t) = resource state graph(?)
+•	State is SAFE
+o	using the currently available resources and those which will be returned by currently executing task steps, it is possible to find a valid sequence of the uninitiated task-steps in the currently initiated but incomplete tasks 
+o	such that all tasks in the system can be run to completion.
+o	valid if the implied sequence of resource requests is such that at the time each request is made there are sufficient available resources to satisfy it.
+•	Note that the initial state in which no resources are yet allocated and all are available is always a safe state.
+o	there always exists an initial sequence of all tasksteps according to which all tasks are completed.--> I DON’T THINK SO unless sunod sunod nga sila…
+o	we can always execute the tasks in strict serial sequence if necessary.
+o	if there is a way to complete the currently executing tasks without getting into a deadlock, we can clearly complete the remaining uninitiated tasks (again, executing them in serial order if necessary).
+•	The ability to avoid deadlocks subsequent to time t can be guaranteed if and only if S(t) is a safe state
+•	The problem of determining whether a state S(t) is safe following the granting of a request generally requires a procedure to search for an appropriate sequence of tasksteps.
+o	the procedure begins by assuming that the currently available resources are augmented by those allocated to currently executing task-steps.
+o	equivalent to assuming that the first task-step in the sequence sought is not begun until all currently executing task-steps have been allowed to complete
+•	It is likely to be necessary to assume that less is known about the resource usage of tasks than is assumed in the task-step model.
+•	B. Habermann’s model
+o	We deal with entire tasks rather than task-steps
+o	It is assumed that only the maximum number of resources required by each task is known.
+o	for each task T~ we have a resource vector that gives the maximum number of resources of each type that will 1)e required at any time during execution of Ti.
+o	A state S(t) will be safe in this model if and only if there exists some sequence according to which the currently executing (i.e., initiated but incomplete) tasks can complete, assuming they will still need their maximum resource requirements at some time, and assuming that we have only the currently available resources at the beginning of the sequence.
+•	The search for sequences of the executing tasks can be significantly more efficient than the search described with the task-step model
+o	Since each task will return as many resources as it requests,
+o	The sequence of available resource vectors corresponding to a sequence of the executing tasks will always have the monotonically non-decreasing property mentioned earlier
+o	Search time: square of the number of executing tasks
+o	Technique for shortening the search time:
+?	A request has just been made by task T, the system is in a safe state, and we wish to determine if the request is safe.
+?	If at any point in developing a trial sequence we find that the corresponding available resources are sufficient to complete Ti = can assume the request is safe.
+•	Why? if Ti, the source of the request, can complete and release all the resources it controls, all other tasks can certainly be completed, since the state previous to the request was safe and they could therefore have been completed before the request was made.
+•	Basic Model: we can determine precisely when deadlocks are unavoidable on granting a request.
+•	Habermann’s Model: false threats of deadlocks may degrade resource utilization; significant advantages of requiring less information about task behavior; more efficient algorithm for testing whether states are safe.
+•	Hebalkar Use of graph model to represent processes of more general structure than the sequence of task steps
+o	Nodes?represent transitions of a computation
+o	Arcs? represent demand vectors of resources
+o	This model has been shown to facilitate the representation of safe states as well as deadlock states.
+6	CONCLUSIONS
+•	It is not possible at present to predict accurately either the costs or the benefits that can be obtained by use of the techniques described.
+•	Good measures of the running time of the various search algorithms and of the resource utilization achieved by systems using them are not available.
+•	Suggestion for recovery model: use costs (for the preemption of resources from a task) that are functions of the time for which that task has been in progress, and perhaps of its priority.
+•	The selection of an appropriate avoidance model involves a balance between the efficiency of the algorithm (for determining whether granting a request is safe), the level of resource utilization possible, and the cost to the user in providing estimates of potential resource requirements.
+•	In avoiding deadlock, an alternative to the search algorithms presented may be feasible when the number of safe sequences is relatively small (and the system may be operating inefficiently, having to deny most requests).
+o	This alternative approach is to store the current set of safe sequences, updating them as necessary, and to inspect the first element of each sequence to decide whether a request can be granted.
+o	However, as the number of safe sequences increases, the storage and updating problems will make this approach less efficient, and some scheme for switching from one method to the other might be necessary.
+•	More important for the sake of efficiency: Prevent system from entering a state of near deadlock
+o	E.g. progress can be made only by granting requests from one task at a time.
+•	Suggestion: focus on reducing supervisor overhead rather than improving resource utilization?deadlocks are avoided by inspection of resource requirements only at the beginning of task executions rather than each time a resource request is made.
+o	Sacrifices potential losses in resource utilization for savings in supervisor execution times.
+•	In the interest of system operating efficiency, deadlocks (and the resulting "disasters") are allowed to occur, but measures are described that ensure that such events are kept at an acceptably low frequency.
+•	The problem of deadlock has not been of major (or at least continuing) importance in most current systems, mainly because it has amounted to little more than an isolated debugging problem.
+•	For future systems sharing an increasingly costly set of services and resources among an increasing number of individual users, these problems are likely to become more pressing.
+o	More important for those systems that provide a common set of large files (or data bases) available to the many users of the system for both read-only access and updating.
+II.	Some Deadlock Properties of Computer Systems by Holt
+1	1 COMPUTER SYSTEMS AND DEADLOCK
+•	Simple Graph model of computer systems
+•	Deadlock ? situation in which one or more processes in a system are blocked forever because of requirements that can never be satisfied.
+•	Deadlocked processes will remain blocked until special action is taken by some “external force” such as the operator or the operating systems
+o	Ex. Processes P1, P2, Resources R1, R2
+o	R1 is assigned to P1 and R2 is assigned to P2
+o	P1 requests for R2 and P2 requests for R1.
+o	P1 and P2  are deadlocked
+•	Studying deadlock = studying logic process interactions in computer systems
+2	EXAMPLES OF DEADLOCK IN CURRENT SYSTEMS
+•	Major advantage provided by OS: ability to share resources among processes
+•	Ad hoc procedures for preventing deadlock are not optimal; further work is required to clarify which are the least costly
+•	Ex. Competition for spooling space on the disk
+o	Only way to recover is to restart the system
+o	Ad hoc solution: prohibit manually the spooling of new jobs once the utilization of spooling space becomes too high.
+o	Costly in terms of idle spooling space
+•	Deadlock caused by faulty synchronization processes solutions
+o	Allow an arbitrary absolute limit of 30 mins waiting time before canceling the job
+o	Ignore
+•	Deadlock can also happen when a program is waiting for an event which will never occur. But resources are allocated to this program and will remain idle until deadlock is removed by OS.
+
+3	DEADLOCK STRATEGIES
+•	Prevention: system is designed so that is it secure from deadlock. In a not secure scenario, a system can be made secure by prohibiting operations which may lead to deadlock
+o	Habermann’s policy of maximum claims is an example of a prevention strategy.
+•	Detection: the system can recover by terminating deadlocked processes or pre-empting resources from processes.
+o	Can allow higher resource utilization that deadlock prevention
+o	Should be used when deadlock is not too frequent and recover is not expensive
+o	Offers a distinct advantage of a soft fail over Crash
+•	Crash
+o	Deadlocks are not automatically detected
+o	“No strategy” strategy
+o	Saves time and space required by deadlock prevention and detection
+
+4	BASIC DEFINTIONS
+•	System
+o	A pair of set of states (E) and set of processes (N)
+o	Each process is mapped from system states to subsets of system states (Arcs?)
+ 
+o	Call the change of state from S to T an operation by process P
+•	Process
+o	Non deterministic
+o	If P can execute no operation: process is blocked
+?	Process P is blocked in state S if there exists no state T such that S can change to T
+o	If P will never again be able to execute an operation: Process is deadlocked
+?	Process P is deadlocked in state S if for all T such that S cannot transform to T in any way and Process is blocked in T?
+?	Opposite counterpart = not deadlocked.
+•	If one or more processes are deadlocked in state S, S = deadlocked state
+•	If all processes are deadlocked in S, S = total deadlock State
+•	A state is secure ? it cannot change in any operations to become a deadlock state.
+o	State S is secure if for all T such that S can change to T and T is not a deadlock state.
+•	Lemma: S?T, If S is a deadlock state then T is a deadlock state. If S is a secure state then T is a secure state ( NOT AGREE with second??)
+•	Deadlock and security are permanent conditions? refer to lemma above
+5	AN EXAMPLE OF A SIMPLE SYSTEM
+•	System with 2 resource instance and 2 processes (can request one unit at a time and release one unit at a time)
+•	Represent each state of a system as Sjk
+o	j = state of Process 1
+o	k = state of process 2
+•	Blocked: Processes are blocked if it requested a unit but no more units are available
+o	S14
+o	No edges directed away
+•	Deadlock: occurs when one unit of resource has been allocated to each process and each process requests one more unit.
+o	S33
+o	Total deadlock state
+o	No edges are directed away
+•	If a deadlock state can be reached from any other state, then there are no secure states in the system.
+
+6	RESOURCES IN COMPUTER SYSTEMS
+•	Processes in computer system can interact
+o	Explicitly: by exchanging messages
+o	Implicitly: by competing for physical objects such as tape drives
+o	Either way may cause blocking of processes
+•	Resource? any object which may cause a process to become blocked
+o	Reusable? model competition for objects
+?	Fixed total number of units: either available or assigned to / acquired by a process
+?	A unit can be assigned to at most one process at a time
+?	Units cannot be pre-empted? will not become available until released by the process.
+?	Examples 1: physical devices of a system: channels, core, tape drives, drums, disks. Units will depend on the allocation strategies of the computer system
+?	Examples 2: information structures shared by processes: records in a file, linkage pointers. They are inspected or updated without interference from other processes (can be critical section)
+?	Units are not created nor destroyed, they are only passed on (acquired then released)
+o	Consumable ? model exchange of signal or messages
+?	No Fixed total number of units of the resources
+?	Every unit released is available.
+?	If a unit is acquired by a process, it ceases to exist
+?	Only a producer process can release units of the resource?allowed to release any number of units at any time (as long as it is not blocked)
+?	Examples 1: Card Reader produces / releases?card images? consumable resource
+?	Examples 2: External interrupts and various types of messages
+?	Units are created (produced /released) and destroyed (consumed / requested / acquired)
+7	SOME DEFINITIONS FROM GRAPH THEORY
+•	Model of computer systems:
+•	Directed Graph? a pair (N, E) of nodes and edges
+•	Each edge is an ordered pair (a,b) where a and b are nodes in N? an edged directed from a to b
+o	a is a father of b
+o	b is the son of a
+•	Bipartite graph
+o	The set of nodes N can be partitioned into disjoint subsets R and RHO such that each edge has one node in R and the other node in RHO
+o	There are at most 2mn edges in E. m and n are the numbers of nodes in RHO and R.
+•	Sink Node ? a node with no edges directed from it.
+•	Isolated Node? a node with no edges directed to or from it.
+•	Path? a sequence containing at least 2 nodes where there is an edge
+•	Cycle? a path whose first and last nodes are the same.
+•	Reachable Set of node? a set of all nodes b such that a path is directed from a to b
+•	Knot? a nonempty set K of nodes such that the reachable set of each node in K is exactly set K.
+o	A graph does not contain a knot if each node is a sink or has a path directed from it to a sink.
+8	GENERAL RESOURCE SYSTEMS
+•	Formal model of a system of interactive processes
+•	State of a system ? represented by a directed graph
+o	Node? corresponding to each process and resource
+o	Edges? represents interactions in the system from process to resource and vice versa.
+•	Composed of the following:
+•	Set of Processes R
+•	Set of Resources RHO
+•	Partition of RHO into 2 disjoint subsets: set of reusable and consumable resources
+o	For each reusable resource Rj, there is a strictly positive integer ij, called total units of Rj
+o	For each consumable resource Rj, non empty subset of processes? producers of Rj.
+•	Set of states E of a GRS = set of all GR graphs for the system
+•	GRG ? a bipartite directed graph whose disjointed set of nodes are R and RGO, together with a nonnegative integer vector? available units vector.
+o	Request edges ? Edges from process nodes
+o	Assignment edges? Edges directed from reusable resource nodes
+o	Producer edges? Edges directed from consumable resource nodes
+•	GRG Properties
+•	Reusable resource node Ri
+o	Number of assignment edges <= total units ti
+o	ri (the available units) = total units ti – number of assignment edges from Ri
+o	For process node P
+?	Number of request edges (R, R) + number of assignment edges cannot exceed total units ti.
+?	Process cannot request mode thatn the total units of a reusable resource
+•	Consumable resource node Ri
+o	There is a producer edge directed from ri to process node P, if P is one of the producers of Ri
+o	ri(the available units) is any non negative integer.
+o	A system having consumable resources will have an infinite number of states
+•	Reusable resource?Total units are drawn as subnodes inside the node
+•	Available units? Are those that do not have assignment edges drawn from them
+•	Request Edges?“waits for” relations.
+•	Assignment edges? “flow of units” relations
+•	Processes map the system states into subsets of system states
+•	3 types of operations: requests, acquisitions, and releases ? results to GRG being changed from different states
+•	A process P is blocked if and only if there is a resource node R such that the number of request edges directed from P to R exceeds ri (available units)
+9	NECESSARY AND SUFFICIENT CONDITIONS FOR DEADLOCK
+•	A process is deadlocked? where there is no way for the process to become not blocked
+o	If there is some sequence of operations which leaves a process not blocked? process is not deadlocked
+•	Sequence of Graph Reduction? method to see if processes are deadlocked.
+o	Corresponds to the best set of operations which P can execute to help unblock other processes
+o	Forcing P to release as many units as possible
+•	OMEGA? An infinitely large positive integer. Any operations(add or minus) acted upon OMEGA will result to OMEGA
+•	Reduction operations by any unblocked process node
+o	Units of consumable resources  = OMEGA ? units of the resource are enough to satisfy all subsequent requests
+o	?Requires that each consumable resource R have a non-empty set of producers & since r = OMEGA, no need for producers
+o	For each reusable resource, delete all request edges and assignment edges (this with increase in ri by one)
+o	For each consumable resource, decrement ri by the number of request edges; sets ri to OMEGA if P is a producer of R
+o	Delete all edges
+•	Graph is completely reducible? a sequence of reductions deletes all edges in the graph
+o	Every reduction of a GRG ? another GRG
+•	Theorem 1: Process P is not deadlocked in GRG S if a sequence of reduction applied to S leaves a state in which P is not blocked.
+o	Argument: If P is not deadlocked in S, then S can be reduced to a state in which P is not blocked.
+o	If there is a sequence of moves leaving Pi unblocked, then such a sequence can be found using graph reductions (?)
+o	Corollary: If a GRG is completely reducible? it is not a deadlock state
+?	In a completely reduced state, no process is blocked
+•	Expedient state? a state in which all processes having requests are blocked
+o	A simple sufficient condition for deadlock
+o	Cause: if all possible requests are granted (not specific to the availability of resources)
+o	Units are assigned only immediately following requests and releases
+•	Theorem 2: In GRG, a cycle is a necessary condition for deadlock; if graph is expedient, then a knot is a sufficient condition for deadlock? if SUR only.
+o	Argument: Graph with no cycle? there exists a linear ordering of the processes? the graph is completely reducible? not a deadlock state
+o	Expedient graph containing a knot? all processes in the know are all blocked; waiting for units of resources in the knot and can only be increased by the processes in the knot.
+?	All processes are deadlocked; state is deadlocked
+o	A GRG may contain a knot and still not a deadlock state
+o	Corollary: In an expedient graph, P is not a sink and no path is directed from P to a sink, then P is deadlocked.
+10	GENERAL RESOURCE SYSTEMS WITH SINGLE UNIT REQUESTS (SUR)
+•	SUR? a process may request only one unit at a time ? at most one edge may be directed from any process node.
+•	Theorem 3: An expedient GRG with SUR? is a deadlock state if it contains a knot
+o	If the graph does not have a knot but there are blocked processes, then there exists a path directed to a sink, which is also a process node.--> not deadlock
+o	Any blocked process? can be shown to be not deadlocked by reduction
+o	If it’s completely reducible, then it’s not deadlocked
+•	Deadlock Detection algorithm 1: see if the graph contains a knot. / is a deadlock state
+o	Make all fathers of sinks into sinks? do this repeatedly
+o	Graph won’t have a knot if all nodes becomes sinks
+o	A mechanism for successively reducing the graph
+o	Can be used only for GRG with SUR
+o	Max execution time: total number of edges in the graph
+•	Deadlock Detection algorithm 2: see if a blocked process is deadlocked.
+o	Works by tracing out all paths leading from the process’s node.
+o	Process will not be deadlocked if some path leads to a sink
+o	Can be used only for GRG with SUR
+o	Max execution time: total number of edges in the graph
+•	If weighted edges, then the execution time becomes mn; max number of edges:2mn
+•	Deadlock cause for system with SUR: a request for an unavailable unit
+11	CONSUMABLE RESOURCE SYSTEMS (CRS)
+•	A special case of GRS where there are only consumable resources.
+•	All interactions are explicit
+•	Producer-consumer relationships
+•	Associate each resource with a set of processes: consumers
+•	Every process is a producer or consumer of at least one resource
+•	Claim limited consumable resource system? CRS
+o	Claim limited Graph (CRG)? a system having 0 available units; and having a request edge if process is a consumer
+?	Can determine the processes, the resources, sets of producers and consumers.
+•	Theorem 4: A CRS is secure if its CRG is completely reducible
+o	Can be used to determine whether a system could deadlock
+12	DEADLOCK DETECTION IN REUSABLE RESOURCE SYSTEMS (RRS)
+•	A special case of GRS where there are only reusable resources.
+•	Theorem 5: S is any state of RRS.
+o	S is not deadlock state if S is completely reducible
+o	If different sequences of reductions are applied to S resulting to a state which cannot be reduced
+?	Then all states are identical
+o	Observations:
+?	A reduction can never decrease the available unit
+?	A reduction will delete the same edges regardless of which reductions were done preciously.
+o	When the graph is not completely reducible, blocked processes are deadlocked.
+•	If there is only one unit of a reusable resource, cycle = not complete reducibility is a condition for deadlock
+•	Algorithm exists for RRS: reduces the graph as long as possible until all edges are deleted.
+o	Every sequence of reduction will lead to same final graph, algo does not need to backtrack.
+o	Process has wait counts? the number of resources whose available units are less than those requested by the process
+o	Resource has ordered requests? a list of processes requesting the resource and it is ordered by the number of units requested.
+o	Algorithm 3: use to see if an RRS is completely reducible (use for detecting or preventing deadlock)
+o	How it works:
+?	Reduce all processes which have 0 wait counts and nonzero allocations
+?	Processes with 0 wait counts and no allocations are considered reduced.
+?	Each reduction increases the available units of at least one resource? thereby decreasing wait counts
+?	Max time: is mn. N is process
+?	To maintain continual deadlock detection: Only apply this algo when unavailable units are requested.
+?	Can be stopped as soon as requesting process’s wait count reaches 0.
+•	The counts have their advantage? no search is necessary to find processes which have become bale to acquire their requested units. These processes wait counts become 0 as a result of release
+•	Only requests for unavailable units can cause deadlock in RRS
+•	Can Use Algo 3 to test for deadlock in batch processing system, and if it occurred, terminate jobs or preempt resources is necessary
+
+13	DEADLOCK PREVENTION IN REUSABLE RESOURCE SYSTEMS
+•	Prevent deadlock in RRS: use a maximum limit on each process’s need for resources
+•	Cij:  a cell in claim matrix (Resources x Process)
+•	Claim limited RRS? RRS ; Processes never request more that they claim
+•	Claim Limited Graph (CLG): adding all request edfes and existing assignment edges = Cij
+o	Have all processes request as many units as allowed by their claims
+•	To prevent deadlock, (guarantee that it won’t occur when you allow processes to request as many resources allowed by their claims.): the system is never allowed to enter a state whose CLG represents a deadlock state
+•	Define an acquisition policy: eliminates some of the acquisition operations? thereby creating a new system which is secure.
+o	Optimum if there exists no other acquisition policy which eliminates fewer acquisitions
+o	An acquisition operation is safe? results in a state whose CLG is completely reducible
+•	Theorem 6: an acquisition policy is optimum: if it eliminates acquisitions which are not safe
+o	Argument: if acquisition policy allows acquisition which is not safe, then a sequence of operations exists leading to deadlock
+o	If only safe acquisitions are allowed, then any state whose CLG is completely reducible is not a deadlock state
+o	Deadlock can be prevented while granting as many requests as possible by refusing to grant requests which may result to deadlock.
+o	A state may lead to deadlock by seeing if its CLG is completely reducible by using algo 3
+•	Habenmanns’a algo vs. algo 3
+o	mn^2 vs mn
+
+14	CONCLUSIONS
+•	Technique of graph reductions can be used
+o	To determine if a state in a system is deadlocked
+o	To determine if a system (CRS) is secure from deadlock
+o	To implement deadlock prevention in RRS
+III.	Detecting Deadlocks in Concurrent Systems by BRICS
+ABSTRACT
+•	Geometric Description for deadlocks
+•	In a directed graph, the local maxima correspond to deadlocks
+INTRODUCTION
+•	Detection of deadlocks motivated by applications in data engineering
+•	Description of deadlocks in terms of geometry and progress graph
+•	MAIN IDEA: model a discrete concurrency problem in a continuous geometric setup
+o	A system of n concurrent processes will be represented as a subset of Euclidean space Rn.
+o	Each coordinate axis corresponds to one of the processes.
+o	state of the system corresponds to a point in Rn ? whose i'th coordinate describes the state of the i'th processor
+•	Execution? a continuous increasing path within the subset from an initial state to a final state
+•	Use of geometry and topology to study concurrency
+o	Geometric models? allows one to use spatial intuition
+o	Topology? serve as tools to prove properties of concurrent systems
+•	Transaction? a sequence of P and V actions known in advance
+•	GRAPH PROPERTIES
+o	P and V actions? lock and release respectively
+o	Assume: Each transaction starts at 0 and ends in 1
+o	Shared area ?states not allowed in any execution path since they correspond to mutual exclusion; forbidden area
+o	Execution path? a path from initial state to final state avoiding the forbidden area and increasing each coordinate.
+o	Unsafe area? there is no execution path from any state in that area to the final state?DEADLOCK
+o	Unreachable area?same as above.
+•	Finding deadlocks and unsafe areas? geometric problem of finding n-dimensional corners.
+o	Translating the underlying geometry to properties of a directed graph
+o	Deadlocks? correspond to local maxima in the associated partial order
+•	Deadlocks can be found in concurrent systems with a variable number of processes involved. 
+o	One has to consider partial orders on sets of boxes" of variable dimensions.
+•	non determinism can be modelled by glueing partial orders together along the nodes where decisions have to be made.
+FROM CONTINUOUS TO DISCRETE
+•	Asd
+DEADLOCKS IN SEMAPHORE PROGRAMS
+•	Deadlocks occur at some point of an execution, when every transaction demands access to a record, which is already locked by another transaction.
+•	One should keep track of the set of records that are already accessed by some transaction at a given time
+•	S? set of records
+•	T?set of transactions
+•	A(T)? set of records accessed by T
+ALGORITHMS AND COMPLEXITY CONSIDERATIONS
+•	2 Final algorithms for finding deadlocks in general situation and estimates on complexity:
+A.	First:
+•	Partial Order? represented by the associated directed graph
+•	Node? represents an n-rectangle; has pointers to neighbors; has integer record of sons; 2 booleans (if in F or is a leaf); pointer for a list of leaves
+•	IDEA: all n-rectangles that are in F are marked and all pointers to and from these are removed?
+•	Deadlocks: all leaves of the resulting graph except R1
+•	Go through all the Ri  F; if a node representing an n-rectangle R  Ri is not yet marked in F, mark it, nil the pointers to its sons and nil all pointers to it. If one of the parents becomes a leaf by this operation, add it to a list representing potential deadlocks", and set a pointer to its place in the list. If R itself was marked a leaf previously, then remove it from the list of potential deadlocks. If the node has already been marked in F, do nothing. When this is done for all nodes in R = 1 Ri, the list of potential deadlocks contains only actual deadlocks.
+•	Complexity: n2kN.
+B.	Second:
+•	R? denote the directed graph on n-rectangles
+•	R’? full subgraph
+•	Deadlock candidate? if contained in Rf and all upper neighbors are contained in at least one of the sets.
+•	Complexity: 2n+2( r/n )nrn.
+
+
+
+https://www.youtube.com/watch?v=4KPEzu92ZWI
+control techniques for deadlock
+Prevention:
+1.	Hold and Wait
+2.	No Preemption
+3.	Circular Wait
+Avoidance
+1.	Deadlock Avoidance algorithm
+Detection:
+1.	Deadlock Detection Algorithm
+
+https://www.youtube.com/watch?v=nxjJ-oAsaQs / https://www.youtube.com/watch?v=xDwcm8bQ-Mg
+
+Deadlock ? situation wherein 2 programs ceased to function because their shared resources are preventing each other to access the same resource
+Necessary conditions for deadlock:
+1.	Mutual Exclusion ? at least one resource is held in a non-shareable mode. One process has total control of the resource. Any requests is delayed until the resource is released
+2.	Hold and wait? there must be an existing process that holds a resource and also waits for another resource that are currently being held by another resource
+3.	No Pre-emption? resources cannot be taken out from processes / or released voluntarily unless the process is complete
+4.	Circular Wait? processes in the system forms a circular chain wherein each process is waiting for a resource held by the next in line process
+To avoid deadlock,  car can only enter an intersection if  it will not stop inside the intersection? process can only get a resource if it will not be needed by the process after him???
+Deadlocks are not possible when there is only a single process (see condition 2) and between 2 threads in a process. Process holds resource, not the threads (only has access)
+
+
+Mutex? processes claim exclusive control of the resources they require
+Wait for? processes hold resources already allocated to them and are still waiting for additional resources
+No Pre-emption? resources cannot be taken away / removed from the process using them until it used to completion. A resource can be released only voluntarily by the process holding it, after that process has completed its task.
+Circular Wait? a circular chain of processes exist in which each process holds one or more resources that are requested by the next process in chain
+
+Most OS do not prevent nor deal with deadlocks []? needs citation
+
+Ex or resource types: Memory space, cpu cycle, files, output devices, input devices
+
+A process must request a resource before using and release after use. Request cannot be guaranteed immediately. It has to wait until it acquires the resource. A process can request as much resource as it needs for its execution. After the process terminates, it releases all resources it has used.
+
+https://www.youtube.com/watch?v=_LuPqnOLRH4
+uses resource allocation graph
+Deadlocks can be described using a directed graph called: system resource allocation graph
+SRAG: It contains a set of vertices V and set of edges E
+V: partitioned into 2 different types of nodes: P ? set of process and R? set of resources
+Edges:
+Requested edge: directed edge from P to R
+Assignment edge: directed edge from R to P
+If a graph contains no cycles, then for sure no process is deadlocked. If it has a cycle, a deadlock may exist depending on resource instances. If only one instance, then sure it has a deadlock. If resource type has many instances, then a deadlock may occur.
+Cycle is necessary and sufficient condition for a deadlock.
+
+https://www.youtube.com/watch?v=21ICtMIKyPA
+
+Methods for Handling Deadlocks: Prevention, Avoidance, Detection, Recovery
+Ways to deal with deadlocks:
+1.	Software protocol. Which can be use to prevent dealocks. Ensure that the system will never enter a deadlock state
+2.	Allow it to happen then recover
+3.	Ignoring the problem and pretend it never occurred. This is common in most OS: windows and uniX
+Methods for Handling Deadlocks:
+DP? provides a set of method to ensure that at least one of the necessary conditions can not hold.
+All 4 conditions must be held concurrently. 
+By ensuring one of them do not hold, we can prevent deadlocks
+Mutex? this must be hold by non-shareable resources (e.g. printers). This is not required for shareable resources (e.g. reading a file)
+Hold and Wait? guarantee that when a process request a resource, it does not hold any resource.
+Protocols that prevent hold and wait: 
+1.	Requires each process to request for all resources before it begins execution. Can implement by requiring that system calls to requesting resources before all other system calls. DISADV: resource utilization may be low since resources maybe allocated but remain unused for a long time
+2.	Allow process to request resources when it has none. DISADV: starvation is possible. A process that needs many resources may wait definitely because a resource may always be allocated to some other processes.
+No pre-emption? if a process is holding some resources and requests for another resource which cannot be immediately allocated, then the process has to release the resource which it currently holds. The released resources are added to the list of resources the processes is waiting. Process can be started if it has all the resources it needs.
+This can be applied with resources whose state can be easily saved and restored later (e.g. cpu registers and memory space). Not applicable for others such as printers and tape drivers as any progress will be lost and be re initiated again.
+Circular wait? impose a total ordering of all resource types (each resource type is assigned an integer number for example) and to require each process requests resources in an increasing order of enumeration. The integer number can be used to compare 2 resources and to determine if one precedes the other in ordering
+Transitivity.
+
+DA?requires OS be given in advance additional info re resources that a process will need and use during its lifetime.
+This means requiring additional information about how resources are to be requested. ? difficult to get
+Approach:
+Do not start a process if its max requirement can lead to a deadlock.
+Do not grant incremental resource if this will lead to a deadlock
+System can decide then if process has to wait or run.
+Steps:
+1.	Each process declares the maximum number of resources of each type that it may need.
+Resource allocation state? defined by the number of available and allocated resources and the max demands	 of the processes
+DA algo examines this RA state to ensure that there can never be a circular wait condition. How?
+2.	A process requests an available resource. System decides if immediate allocation leaves the system in a safe state.
+Safe State ? there exists a sequence of all process in the system such that for all Process, the resources requested by each process can still be satisfied by the currently available resource and the resource held by other processes before it (previous processes)
+ 
+3.	A deadlock state is an unsafe state. Unsafe state may lead to a deadlock. But not all are deadlock. OS can avoid unsafe and deadlock state.
+4.	In an unsafe state, the OS cannot prevent processes from requesting resources in such a way that a deadlock can occur.
+Avoidance algo:
+1.	Resource allocation graph for single instance of a resource
+a.	Claim edge (dash line)? shows that a process may request a resource. So it can be converted to a request edge. If allocated, then it becomes an assignment edge.
+2.	Bankers algo for multiple instance of a resource.
+DD & DR? system uses an algorithm that examines the state of the system to determine / find whether a deadlock has occurred and an algorithm to recover from deadlock if it has indeed occurred
+To recover, one can inform the operator and let it deal with it manually. Or let the system recover from deadlock automatically.
+Use resource allocation graph and then convert to a await for graph
+
+ 
+Undetected deadlock ? no algorithm to detect and recover deadlocks: system will degrade performance until system will stop functioning and will need to be restarted manually
+

@@ -9,7 +9,10 @@
 OS Project by Jen Arroyo And Jill Soria
 October 2016
  -->
+
+
 <?php
+
 if(isset($_GET['username']))
 {
     $username = urldecode($_GET['username']);
@@ -76,10 +79,6 @@ $prompt_label   = $username . '>';
     var root_directory = '', //fixed
       current_directory = root_directory, //set the root directory as current directory
       display_directory = ''; //for string version of current directory?
-
-    //var root_directory = "C:\\xampp\\htdocs\\terminal-master\\file_directory";
-    // var current_directory = root_directory;
-    // var display_directory = "C:\\xampp\\htdocs\\terminal-master\\file_directory\>";
 
     // Always focus on the commandline
     $(document).ready(function()
@@ -221,7 +220,7 @@ $prompt_label   = $username . '>';
     var marqueeSomething = new commandMetadata("marquee  ", "marquee input", "display scrolling string that will move from right to left. ", "marquee any");
     var moveFile = new commandMetadata("mv", "mv filename, directory", "move file to the desired directory", "mv filename, directory");
     var removeFile = new commandMetadata("rm", "rm filename", "removes or deletes the file.", "rm filename");
-    var renameFile = new commandMetadata("rn", "rn oldfile newfile", "renames the file.", "rn oldfile newfile");
+    var renameFile = new commandMetadata("rn", "rn oldfile newfile", "renames the file or extension or both.", "rn oldfile newfile");
     var saySomething = new commandMetadata("say", "say any", "display the string in a new line.", "say any");
     var showTime = new commandMetadata("time", "as is", "displays current time. ", "time");
     var quit = new commandMetadata("exit", "as is", "exit console, back to login page.", "exit");
@@ -329,9 +328,6 @@ $prompt_label   = $username . '>';
           current_directory = root_directory;
           display_directory = ""; //orig
 
-          //code below reflects actual terminal behavior
-          //display_directory = "C:\\xampp\\htdocs\\terminal-master\\file_directory";
-
         }
       }
       else{
@@ -366,7 +362,8 @@ $prompt_label   = $username . '>';
         //dataType: "html",
         dataType: "json",
         data: {"directory": directory},
-        success: function(result) {
+        success: function(result)
+        {
           $('#screen').append('<div> <?php echo $prompt_label;?>' + display_directory + '>ls ' + directory + '</div>');
           //$('#screen').append("<pre>" + result + "</pre><br/>");
 
@@ -375,22 +372,33 @@ $prompt_label   = $username . '>';
               "<div style='float:left;width:150px'>Name</div>" +
               // "<div style='float:left;width:150px'>Owner</div>" +
               "<div style='float:left;width:80px'>Size</div>" +
+              "<div style='float:left;width:80px'>%</div>" +
               "<div style='float:left;width:200px'>Created</div>" +
               "<div style='float:left;width:200px'>Modified</div>" +
               "<br /></div>";
           $('#screen').append(html);
 
+          var contentCount = 0 ;
           //print file content
-          jQuery.each(result, function(index, file) {
+          jQuery.each(result, function(index, file) 
+          {
             html = "<div style='clear:both'>" +
               "<div style='float:left;width:150px'>" + file.name + "</div>" +
               // "<div style='float:left;width:150px'>" + file.owner + "</div>" +
-              "<div style='float:left;width:80px'>" + file.size + "</div>" +
+              "<div style='float:left;width:80px'>" + file.size +"</div>" +
+              "<div style='float:left;width:80px'>" + file.percentage + "</div>" +
               "<div style='float:left;width:200px'>" + file.created + "</div>" +
               "<div style='float:left;width:200px'>" + file.modified + "</div>" +
-              "<br /></div>";
+              "<br /></div>" ;
             $('#screen').append(html);
+
+            contentCount++;
           });
+          //to display disk size
+          var diskSize = "<div style='float:left;width:150px'>&nbsp;</div><div align=left style='float:left;width:500px'>" + contentCount + " Item(s) <br />" + 
+            1 + " bytes used <br />" +
+            9 + " bytes free <br />"+ "</div>";
+          $('#screen').append(diskSize);
         }
       });
     }
@@ -442,11 +450,12 @@ $prompt_label   = $username . '>';
     }
 
     //Remove file/directory
-    function rm(file) {
-
+    function rm(file) 
+    {
       $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '>rm ' + file + '</div>');
 
-      if (file != "") {
+      if (file != "") 
+      {
 
         $.ajax({
           type: 'POST',
@@ -454,14 +463,17 @@ $prompt_label   = $username . '>';
           //dataType: "html",
           dataType: "json",
           data: {"file": file},
-          success: function(success) {
+          success: function(success) 
+          {
+            var message = "default";
 
-            var message;
-
-            if (success) {
+            if (success) 
+            {
               message = "Successfully deleted file/directory";
-            } else {
-              message = "Delete failed";
+            } 
+            else 
+            {
+              message = "File does not exist! Delete failed";
             }
 
             $('#screen').append('<div style="clear:both">' + message + '</div>');
@@ -469,7 +481,8 @@ $prompt_label   = $username . '>';
           
         });
       }
-      else {
+      else 
+      {
         $('#screen').append('<div style="clear:both"> Please provide file to be deleted </div>');
       }
     }
@@ -574,25 +587,25 @@ $prompt_label   = $username . '>';
 
 <!--     // ADDITIONAL FUNCTIONS FOR FINAL PROJECT
     // I.CLI Should Display the following
-    //   1. Current files in the active directory
+    //   1. Current files in the active directory   
     //   2. Information of each files in the active directory
-    //       a. Data Created
-    //       b. Date Modified
+    //       a. Data Created ->OK
+    //       b. Date Modified ->OK
     //       c. Owner
-    //       d. File Size
+    //       d. File Size   ->OK
 
           // e. EXTRA CREDITS
           //     1. extra credit if file size is measured in the most applicable unit.
-          //         e.g. if file is 1024KB then display 1MB 
-          //     2. Display how much space in the disk has been occupied and how much are unused
+          //         e.g. if file is 1024KB then display 1MB -> OK
+          //     2. Display how much space in the disk has been occupied and how much are unused.
           //     3. Display the percentage of space in the hard disk that is being consumed by each file.
 
     // II. The File Manager should be able to:
-    //   1. Edit the File Name
-    //   2. Edit the extension
+    //   1. Edit the File Name   -> OK
+    //   2. Edit the extension   -> OK
     //   3. Move the file (to a new directory)
     //   4. Copy the file (to a new directory only)
-    //   5. Delete the file
+    //   5. Delete the file -> OK
 
    // III. Should be able to run certain C program that will be provided by the instructor.
    //  IV. (Extra Credit) The File manager should be able to edit the contents of the file inside the console itself 
@@ -600,34 +613,6 @@ $prompt_label   = $username . '>';
    //      (learn more from here: www.ccsf.edu/Pub/Fac/vi.html ). Upon editing, the updated date modified and file size 
    //       should be seen when the contents of the directory are being displayed. 
     // V. (Extra Credit) The File manager should be able to duplicate a file in the same directory and the name would immediately have a (1) or (2) or “Copy of” prefix. -->
-
-
-<!--
-Dev notes:
-
-Accomplishments ao 11/26/2016:
-1. Enhanced the ls function to handle ls + succeeding word = invalid command
-
-2. Changed the myOS to prompt in the different methods in screen append
-
-3.added the ff empty functions:
-  mv - move
-  cp - copy
-
-4. improved the output of the help function by:
-  adding an array to which the display will loop thru, created a commandmetadata class and instantiated several commands. put them on the array commandList created.
-
-For improvements:
-dynamic prompt to reflect current directory -> entails changes in processing the directory
-
-error in cd: going in a subfolder
-
-not working functions for windows:
-rename
-remove
-
-
- -->
 
 </body>
 </html>
