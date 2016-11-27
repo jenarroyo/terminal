@@ -27,7 +27,7 @@ remove
 Accomplishments ao 11/27/2016:
 Added percentage in size unit display
 Added percentage in ls display
-Added the following in LS display: show total items, disk usage and disk free space label. actual data not yet doable.
+Added the following in LS display: show total items, disk usage and disk free space data
 enhanced failed delete message
 
 

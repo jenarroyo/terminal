@@ -13,11 +13,6 @@ October 2016
 
 <?php
 
-include 'ChromePhp.php';
-ChromePhp::log('Hello console!'); //sample
-ChromePhp::log($_SERVER); //sample
-ChromePhp::warn('something went wrong!'); //sample
-
 if(isset($_GET['username']))
 {
     $username = urldecode($_GET['username']);
@@ -417,7 +412,6 @@ $prompt_label   = $username . '>';
             diskFreeSpace = file.diskFreeSpace;
           }); //jQuery Each
 
-      
           var diskSize = "<div style='float:left;width:150px'>&nbsp;</div><div align=left style='float:left;width:500px'> <div>" + contentCount + " Item(s) </div> <div> " + diskTotalSpace + " bytes used </div><div>" + diskFreeSpace + " bytes free </div>" +
             "</div>";
           $('#screen').append(diskSize);
