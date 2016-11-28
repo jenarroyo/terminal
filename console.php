@@ -10,7 +10,6 @@ OS Project by Jen Arroyo And Jill Soria
 October 2016
  -->
 
-
 <?php
 
 if(isset($_GET['username']))
@@ -28,7 +27,6 @@ $root_directory = __DIR__. "/root_directory";
 
 $terminal_label = $username . "'s Terminal";
 $prompt_label   = $username . '>'; //orig
-//$prompt_label = $root_directory . '>'; //overwrite the orig
 
 ?>
 
@@ -326,7 +324,6 @@ $prompt_label   = $username . '>'; //orig
     // ADDITIONAL FUNCTIONS FOR MP02
 
     function setCurrentDirectory(directory) {
-      
       if (directory != "..") {
         //Subdirectory
         if (directory != root_directory) {
@@ -356,7 +353,6 @@ $prompt_label   = $username . '>'; //orig
     function ls(){
 
       var directory = current_directory; //transfer current directory to directory variable
-      console.log("initial ls call of current directory: " + directory);
       
 
           /*** 
@@ -399,7 +395,7 @@ $prompt_label   = $username . '>'; //orig
           jQuery.each(result, function(index, file) 
           {
             //if there are no files in the directory, just get the 2 info needed:
-            if(result.length==2) {
+            if(file.name==undefined) {
               diskUsedSpace = result[0];
               diskFreeSpace = result[1];
             }
@@ -436,10 +432,6 @@ $prompt_label   = $username . '>'; //orig
       var files = arguments.split(" "),
         new_file,
         old_file;
-
-        console.log(files[0]); //old
-        console.log(files[1]); //new
-        console.log(files[2]); //undefined
 
       $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '>rn ' + arguments + '</div>');
       if (files.length == 2) {
@@ -480,7 +472,6 @@ $prompt_label   = $username . '>'; //orig
 
       if (file != "") 
       {
-        console.log(file); //file2.txt
 
         $.ajax({
           type: 'POST',
@@ -512,7 +503,8 @@ $prompt_label   = $username . '>'; //orig
       }
     }
 
-    function cd(directory){
+    function cd(directory){ //directory passed here is the succeeding string
+
 
       $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?>' + display_directory + '>cd ' + directory + '</div>');
       $.ajax({
@@ -520,7 +512,7 @@ $prompt_label   = $username . '>'; //orig
           url: '/terminal-master/cd.php',
           //dataType: "html",
           dataType: "json",
-          data: {"file": directory},
+          data: {'file': directory, 'directory': current_directory},
           success: function(success) {
 
             var message;
@@ -550,7 +542,7 @@ $prompt_label   = $username . '>'; //orig
 
 
 
-    function current_directory(){
+    //function current_directory(){
       // //current directory
       // echo getcwd() . "\n";
 
@@ -559,7 +551,7 @@ $prompt_label   = $username . '>'; //orig
       // //current directory
       // echo getcwd() . "\n";
 
-    }
+    //}
 
     function file_info(){
       // display all file info

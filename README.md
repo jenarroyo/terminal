@@ -35,5 +35,7 @@ fixed the bug in displaying disk size: shows undefined if current directory has 
 Fix: total to used; added an if else to show the disk usage even if current directory is empty.
 removed some clutters;
 added useful info in ls for the getting of directory and other comments
+added an extra data in ajax call to cd to enable change of directories in subdirectories.
+commented the function current_directory, bec it is conflict with variable current_directory
 
  -->

@@ -1,5 +1,4 @@
 <?php
-include 'ChromePhp.php';
 
 function getFileSizeUnit($number) {
     $fileSize = $number;
@@ -36,13 +35,10 @@ $files = array(); //placeholder for files
 //this code is more efficient version of the above. they are just the same
 $directory = __DIR__. "/root_directory/";  //C:\xampp\htdocs\terminal-master/root_directory/
 
-ChromePhp::log($_POST['directory']); // ""--> current directory from console
 
 if (isset($_POST['directory'])) { //true
     $directory .= $_POST['directory']; // adds "" to the root directory
 }
-
-ChromePhp::log($directory);  //C:\xampp\htdocs\terminal-master/root_directory/
 
 //Get files
 $files = scandir($directory, SCANDIR_SORT_NONE); //gets the List of files and directories inside the specified path
@@ -54,14 +50,10 @@ $files = array_diff($files, array(".", ".."));
 
 //Additional attributes
 $diskTotalSpace = getFileSizeUnit(disk_total_space(__DIR__));
-ChromePhp::log("disk total space"); 
-ChromePhp::log($diskTotalSpace); 
+
 $diskFreeSpace = getFileSizeUnit(disk_free_space (__DIR__));
-ChromePhp::log("disk free space");
-ChromePhp::log($diskFreeSpace); 
+
 $diskUsedSpace = getFileSizeUnit(disk_total_space(__DIR__)-disk_free_space(__DIR__));
-ChromePhp::log("disk use space");
-ChromePhp::log($diskUsedSpace); 
 
 
 //BONUS: Get additional info
