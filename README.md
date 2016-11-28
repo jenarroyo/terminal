@@ -30,5 +30,10 @@ Added percentage in ls display
 Added the following in LS display: show total items, disk usage and disk free space data
 enhanced failed delete message
 
+Accomplishments ao 11/28/2016:
+fixed the bug in displaying disk size: shows undefined if current directory has no content
+Fix: total to used; added an if else to show the disk usage even if current directory is empty.
+removed some clutters;
+added useful info in ls for the getting of directory and other comments
 
  -->

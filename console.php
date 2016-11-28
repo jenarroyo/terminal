@@ -24,8 +24,11 @@ else
     die();
 }
 
+$root_directory = __DIR__. "/root_directory";
+
 $terminal_label = $username . "'s Terminal";
-$prompt_label   = $username . '>';
+$prompt_label   = $username . '>'; //orig
+//$prompt_label = $root_directory . '>'; //overwrite the orig
 
 ?>
 
@@ -82,9 +85,9 @@ $prompt_label   = $username . '>';
       current_directory = root_directory, //set the root directory as current directory
       display_directory = ''; //for string version of current directory?
 
-    //var root_directory = "C:\\xampp\\htdocs\\terminal-master\\file_directory";
-    // var current_directory = root_directory;
-    // var display_directory = "C:\\xampp\\htdocs\\terminal-master\\file_directory\>";
+    // var root_directory = "C:\\xampp\\htdocs\\terminal-master\\root_directory",
+    //     current_directory = root_directory,
+    //     display_directory = "C:\\xampp\\htdocs\\terminal-master\\root_directory\>";
 
     // Always focus on the commandline
     $(document).ready(function()
@@ -110,6 +113,7 @@ $prompt_label   = $username . '>';
           // $('#screen').append($('<div>').text("<?php echo $prompt_label;?>" + value).prepend($('</div>'))); //working without clone() better because optimized
           // $('#screen').append($('<marquee direction="right">').text(value).prepend($('</marquee>'))); //working marquee command
 
+          //place holders
           var command = '';
           var succeeding_string = '';
           var space_index = value.indexOf(" ");
@@ -349,13 +353,10 @@ $prompt_label   = $username . '>';
       
     }
 
-    function getUsedLocalStorageSpace() {
-      return Object.keys(window.localStorage).map(function(key) { return localStorage[key].length;}).reduce(function(a,b) { return a+b;});
-    }
-
     function ls(){
 
       var directory = current_directory; //transfer current directory to directory variable
+      console.log("initial ls call of current directory: " + directory);
       
 
           /*** 
@@ -392,29 +393,36 @@ $prompt_label   = $username . '>';
           $('#screen').append(html);
 
           var contentCount = 0 ;
-          var diskTotalSpace = 0;
+          var diskUsedSpace = 0;
           var diskFreeSpace = 0;
           //print file content
           jQuery.each(result, function(index, file) 
           {
-            html = "<div style='clear:both'>" +
-              "<div style='float:left;width:150px'>" + file.name + "</div>" +
-              // "<div style='float:left;width:150px'>" + file.owner + "</div>" +
-              "<div style='float:left;width:80px'>" + file.size +"</div>" +
-              "<div style='float:left;width:80px'>" + file.percentage + "</div>" +
-              "<div style='float:left;width:200px'>" + file.created + "</div>" +
-              "<div style='float:left;width:200px'>" + file.modified + "</div>" +
-              "</div>";
-            $('#screen').append(html);
+            //if there are no files in the directory, just get the 2 info needed:
+            if(result.length==2) {
+              diskUsedSpace = result[0];
+              diskFreeSpace = result[1];
+            }
+            else {
+              html = "<div style='clear:both'>" +
+                "<div style='float:left;width:150px'>" + file.name + "</div>" +
+                // "<div style='float:left;width:150px'>" + file.owner + "</div>" +
+                "<div style='float:left;width:80px'>" + file.size +"</div>" +
+                "<div style='float:left;width:80px'>" + file.percentage + "</div>" +
+                "<div style='float:left;width:200px'>" + file.created + "</div>" +
+                "<div style='float:left;width:200px'>" + file.modified + "</div>" +
+                "</div>";
+              $('#screen').append(html);
 
-            contentCount++;
-            diskTotalSpace = file.diskTotalSpace;
-            diskFreeSpace = file.diskFreeSpace;
+              contentCount++;
+              diskUsedSpace = file.diskUsedSpace;
+              diskFreeSpace = file.diskFreeSpace;
+            }
           }); //jQuery Each
 
-          var diskSize = "<div style='float:left;width:150px'>&nbsp;</div><div align=left style='float:left;width:500px'> <div>" + contentCount + " Item(s) </div> <div> " + diskTotalSpace + " bytes used </div><div>" + diskFreeSpace + " bytes free </div>" +
+          var diskSizeInfo = "<div style='float:left;width:25%'>&nbsp;</div><div align=left style='float:left;width:75%'> <div>" + contentCount + " Item(s) </div> <div> " + diskUsedSpace + " bytes used </div><div>" + diskFreeSpace + " bytes free </div>" +
             "</div>";
-          $('#screen').append(diskSize);
+          $('#screen').append(diskSizeInfo);
         }
       });
     }
