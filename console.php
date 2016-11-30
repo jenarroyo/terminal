@@ -83,10 +83,6 @@ $prompt_label   = $username . '>'; //orig
       current_directory = root_directory, //set the root directory as current directory
       display_directory = ''; //for string version of current directory?
 
-    // var root_directory = "C:\\xampp\\htdocs\\terminal-master\\root_directory",
-    //     current_directory = root_directory,
-    //     display_directory = "C:\\xampp\\htdocs\\terminal-master\\root_directory\>";
-
     // Always focus on the commandline
     $(document).ready(function()
     {
@@ -198,7 +194,7 @@ $prompt_label   = $username . '>'; //orig
 
     function command_say(value, succeeding_string) {
       // say <string with spaces> = display the string in a new line
-      $('#screen').append($('<div>').text("<?php echo $prompt_label;?>" + value).append($('</div><br/><div>' + succeeding_string + '</div>'))); //? br for what?
+      $('#screen').append($('<div>').text("<?php echo $prompt_label;?>" + value).append($('</div><br/><div>' + succeeding_string + '</div>')));
     }
 
     function command_marquee(value, succeeding_string) {
@@ -220,7 +216,7 @@ $prompt_label   = $username . '>'; //orig
 
     var changedir = new commandMetadata("cd", "cd directory", "changes the current directory to desired directory.", "cd directory1");
     var clrscrn = new commandMetadata("cls", "as is", "clears the entire screen.", "cls");
-    var copy = new commandMetadata("cp", "cp filename, directory", "copies the file to the directory", "cp filename, directory");
+    var copy = new commandMetadata("cp", "cp sourcepath, destinationpath (target location and name)", "copies the file to the target location; duplicates if there is an existing file in the destination path", "cp folder/file.ext, folder/file.txt");
     var showDate = new commandMetadata("date", "as is", "displays current date. ", "date");
     var showDatetime = new commandMetadata("datetime", "as is", "displays current datetime. ", "datetime");
     var editFileContent = new commandMetadata("edit", "edit filename", "edits the content of the file.", "edit filename");
@@ -324,11 +320,16 @@ $prompt_label   = $username . '>'; //orig
     // ADDITIONAL FUNCTIONS FOR MP02
 
     function setCurrentDirectory(directory) {
+      console.log("CONSOLE: setting of current directory happening");
       if (directory != "..") {
         //Subdirectory
         if (directory != root_directory) {
+          console.log("CONSOLE: before current dir: "+ current_directory);
           current_directory += directory + "/";
+          console.log("CONSOLE: after current dir: "+ current_directory);
+          console.log("CONSOLE: before display dir: "+ display_directory);
           display_directory = directory;
+          console.log("CONSOLE: after display dir: "+ display_directory);
         }
         else {
           //Root directory
@@ -348,11 +349,14 @@ $prompt_label   = $username . '>'; //orig
         current_directory = folders.join("/");
       }
       
+      //print current directory
+      console.log("CONSOLE: after setting of current directory: " + current_directory);
     }
 
     function ls(){
 
       var directory = current_directory; //transfer current directory to directory variable
+      console.log("CONSOLE: initial ls call of current directory: " + directory);
       
 
           /*** 
@@ -380,7 +384,7 @@ $prompt_label   = $username . '>'; //orig
           //print headers
           var html = "<div style='clear:both'>" +
               "<div style='float:left;width:150px'>Name</div>" +
-              // "<div style='float:left;width:150px'>Owner</div>" +
+              //"<div style='float:left;width:150px'>Owner</div>" +
               "<div style='float:left;width:80px'>Size</div>" +
               "<div style='float:left;width:80px'>%</div>" +
               "<div style='float:left;width:200px'>Created</div>" +
@@ -402,7 +406,7 @@ $prompt_label   = $username . '>'; //orig
             else {
               html = "<div style='clear:both'>" +
                 "<div style='float:left;width:150px'>" + file.name + "</div>" +
-                // "<div style='float:left;width:150px'>" + file.owner + "</div>" +
+                //"<div style='float:left;width:150px'>" + file.owner + "</div>" +
                 "<div style='float:left;width:80px'>" + file.size +"</div>" +
                 "<div style='float:left;width:80px'>" + file.percentage + "</div>" +
                 "<div style='float:left;width:200px'>" + file.created + "</div>" +
@@ -429,9 +433,22 @@ $prompt_label   = $username . '>'; //orig
     //@TODO: Used to move the file
     function rn(arguments) {
 
-      var files = arguments.split(" "),
+      //need revison since what if the first file has a space. please see revision below
+      /*
+      var files = arguments.split(" "), 
         new_file,
         old_file;
+      */
+
+      var files = [];
+      var firstDotIndex = arguments.indexOf(".");
+      var partial = arguments.substring(firstDotIndex);
+      var oldfile = arguments.substring(0, firstDotIndex) + partial.substring(0, partial.indexOf(" "));
+      var newfile = partial.substring(partial.indexOf(" ")+1);
+
+      files.push(oldfile);
+      files.push(newfile);
+
 
       $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '>rn ' + arguments + '</div>');
       if (files.length == 2) {
@@ -442,6 +459,7 @@ $prompt_label   = $username . '>'; //orig
           //dataType: "html",
           dataType: "json",
           data: {
+            'directory': current_directory,
             "old_file": files[0],
             "new_file": files[1]
           },
@@ -478,7 +496,7 @@ $prompt_label   = $username . '>'; //orig
           url: '/terminal-master/rm.php',
           //dataType: "html",
           dataType: "json",
-          data: {"file": file},
+          data: {"file": file, 'directory': current_directory},
           success: function(success) 
           {
             var message = "default";
@@ -505,6 +523,8 @@ $prompt_label   = $username . '>'; //orig
 
     function cd(directory){ //directory passed here is the succeeding string
 
+      console.log("CONSOLE: initial cd call of cd input: " + directory);
+      console.log("CONSOLE: initial cd call of current directory: " + current_directory);
 
       $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?>' + display_directory + '>cd ' + directory + '</div>');
       $.ajax({
@@ -531,15 +551,89 @@ $prompt_label   = $username . '>'; //orig
         });
     }
 
-    function cp(file, directory) {
-      $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '> cp ' + directory + '</div>');
+    // The File manager should be able to duplicate a file in the same directory 
+      // and the name would immediately have a (1) or (2) or “Copy of” prefix.
+    function cp(arguments) { 
+
+      $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '> cp ' + arguments + '</div>');
+      var data = [];
+      //convert all slashes in arguments to be /
+      arguments = arguments.replace(/\\/g,"/"); //g for gloabl = all instances
+
+
+      var splitterIndex = arguments.indexOf(" /");
+      console.log("splitterIndex : " + splitterIndex);
+      if(splitterIndex>0) {
+        data = arguments.split(" /");
+      }
+      else {
+        //correct the dest path
+        var needsSlash = arguments.match("\\.[A-Za-z]{3,4}\\s[\\w]+"); //
+        console.log("needsSlash = "  + needsSlash); //is an array
+        if(needsSlash===null){
+          //directory to be copied.
+        }
+        else {
+          var correctedPart = needsSlash[0].replace(" ", " /");
+          //correct the arguments:
+          arguments = arguments.replace(needsSlash, correctedPart);
+
+          data = arguments.split(" /");
+        }
+      }
+
+      if (data.length == 2) {
+
+        //parsing on file to be copied:
+        var fileTobeCopied = data[0].substring(data[0].lastIndexOf("/")+1);
+
+        if(fileTobeCopied.match("[^*|\"<>?]+\.[A-Za-z]{3,4}")){
+          data.push(fileTobeCopied);
+        }
+
+        $.ajax({
+          type: 'POST',
+          url: '/terminal-master/cp.php',
+          //dataType: "html",
+          dataType: "json",
+          data: {
+            "directory": current_directory,
+            "sourceDirFile": data[0],
+            "destDirFile": data[1],
+            "file": data[2],
+          },
+          success: function(success) {
+
+            var message;
+
+            if (success===true) {
+              message = "Successfully copied file";
+            } 
+            else if(success===false) {
+              message = "Copying of file failed. Please check both source and destination paths.";
+            }
+            else if(success == -2) {
+              message = "Copying failed. Copying of directory is not allowed!";
+            }
+            else if(success == -3) {
+              message = "Copying of file failed. Source to be copied does not exist!";
+            }
+            else if(success == -4) {
+              message = "Copying of file failed. Target Destination has wrong syntax: has no file.";
+            }
+            else if(success == -5) {
+              message = "Copying of file failed. Target Destination does not exist!";
+            }
+
+            $('#screen').append('<div style="clear:both">' + message + '</div>');
+          }
+          
+        });
+      }
+      else {
+        $('#screen').append('<div style="clear:both"> Usage: cp &lt;source dir/file&gt; &lt;dest dir/file&gt;</div>');
+      }
     }
-
-
-    function mv(file, directory) {
-      $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '> mv ' + directory + '</div>');
-    }
-
 
 
     //function current_directory(){
@@ -553,45 +647,8 @@ $prompt_label   = $username . '>'; //orig
 
     //}
 
-    function file_info(){
-      // display all file info
-    }
-
-    function file_info_date_created(){
-
-    }
-
-    function file_info_date_modified() {
-
-    }
 
     function file_info_owner() {
-
-    }
-
-    function file_info_file_size() {
-
-    }
-
-
-    function edit_filename(){
-
-    }
-
-    function edit_fileextension(){
-
-    }
-
-    function move_file_new_directory(){
-
-    }
-
-    function copy_file(file, directory){
-        // The File manager should be able to duplicate a file in the same directory 
-      // and the name would immediately have a (1) or (2) or “Copy of” prefix.
-    }
-
-    function delete_file(){
 
     }
 

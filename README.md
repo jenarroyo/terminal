@@ -38,4 +38,14 @@ added useful info in ls for the getting of directory and other comments
 added an extra data in ajax call to cd to enable change of directories in subdirectories.
 commented the function current_directory, bec it is conflict with variable current_directory
 
+Accomplishments ao 11/30/2016:
+copying of file is now a functionality (and duplicate!):
+	-includes parsing and regex to determing 2 parameters (source, target)
+	converts all \ to /
+intelligence: adds a slash if the dest param doesnt have one at the start. this is to enforce all params have slash at the start for destinations
+detects the following and corresponding error messages to the user:
+if file to be copied is existing
+if target destination is valid
+if source param is a directory
+if dest param is a directory
  -->
