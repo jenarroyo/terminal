@@ -27,6 +27,7 @@ $root_directory = __DIR__. "/root_directory";
 
 $terminal_label = $username . "'s Terminal";
 $prompt_label   = $username . '>'; //orig
+//$prompt_label = $root_directory . '>'; //overwrite the orig
 
 ?>
 
@@ -83,14 +84,16 @@ $prompt_label   = $username . '>'; //orig
       current_directory = root_directory, //set the root directory as current directory
       display_directory = ''; //for string version of current directory?
 
+    // var root_directory = "C:\\xampp\\htdocs\\terminal-master\\root_directory",
+    //   current_directory = root_directory,
+    //   display_directory = "C:\\xampp\\htdocs\\terminal-master\\root_directory\>";
+
     // Always focus on the commandline
-    $(document).ready(function()
-    {
+    $(document).ready(function() {
       $("#command-line").focus();
     });
 
-    $('#command-line').keypress(function(e)
-    {
+    $('#command-line').keypress(function(e) {
         var keycode = (e.keyCode ? e.keyCode : e.which);
         //if enter is pressed
         if(keycode == '13'){
@@ -147,7 +150,7 @@ $prompt_label   = $username . '>'; //orig
           else if (command == "help") {
             command_help(value);
           }
-          else if (command == "exit") {
+          else if (command == "exit" || command == "quit") {
             command_exit();
           }
           else if (command == "ls") {//to show list of files
@@ -160,19 +163,22 @@ $prompt_label   = $username . '>'; //orig
           }  
           else if (command == "rn") {//to rename a file
             rn(succeeding_string);
-          }  
+          }
+          else if (command == "mv") {//to move a file
+            mv(succeeding_string);
+          } 
           else if (command == "rm") {// to remove a file
             rm(succeeding_string);
           }  
           else if (command == "cd") {//to change directory
             cd(succeeding_string);
-          }
-          else if (command == "mv") {//to move files
-            mv(succeeding_string);
-          }  
+          } 
           else if (command == "cp") {//to copy a file
             cp(succeeding_string);
-          }       
+          }
+          else if (command == "vimte") {//to edit a file
+            edit(succeeding_string);
+          }          
           else {
             invalid(value); //invalid command
           };
@@ -194,7 +200,7 @@ $prompt_label   = $username . '>'; //orig
 
     function command_say(value, succeeding_string) {
       // say <string with spaces> = display the string in a new line
-      $('#screen').append($('<div>').text("<?php echo $prompt_label;?>" + value).append($('</div><br/><div>' + succeeding_string + '</div>')));
+      $('#screen').append($('<div>').text("<?php echo $prompt_label;?>" + value).append($('</div><br/><div>' + succeeding_string + '</div>'))); //? br for what?
     }
 
     function command_marquee(value, succeeding_string) {
@@ -222,9 +228,9 @@ $prompt_label   = $username . '>'; //orig
     var editFileContent = new commandMetadata("edit", "edit filename", "edits the content of the file.", "edit filename");
     var showList = new commandMetadata("ls", "as is", "displays all files in the current directory.", "ls");
     var marqueeSomething = new commandMetadata("marquee  ", "marquee input", "display scrolling string that will move from right to left. ", "marquee any");
-    var moveFile = new commandMetadata("mv", "mv filename, directory", "move file to the desired directory", "mv filename, directory");
+    var moveFile = new commandMetadata("mv", "mv sourcePath, targetPath", "move file to the desired directory", "mv folder/file.ext, folder/file.ext");
     var removeFile = new commandMetadata("rm", "rm filename", "removes or deletes the file.", "rm filename");
-    var renameFile = new commandMetadata("rn", "rn oldfile newfile", "renames the file or extension or both.", "rn oldfile newfile");
+    var renameFile = new commandMetadata("rn", "rn oldfile newfile", "renames the file or extension or both.", "rn file.ext, file2.ext");
     var saySomething = new commandMetadata("say", "say any", "display the string in a new line.", "say any");
     var showTime = new commandMetadata("time", "as is", "displays current time. ", "time");
     var quit = new commandMetadata("exit", "as is", "exit console, back to login page.", "exit");
@@ -254,7 +260,7 @@ $prompt_label   = $username . '>'; //orig
       var html = "<div style='clear:both'>" +
               "<div style='float:left;width:100px'>Command</div>" +
               "<div style='float:left;width:250px'>Syntax</div>" +
-              "<div style='float:left;width:500px'>Description</div>" +
+              "<div style='float:left;width:600px'>Description</div>" +
               "<div style='float:left;width:200px'>Sample Code</div>" +
               "<br /></div>";
           $('#screen').append(html);
@@ -264,7 +270,7 @@ $prompt_label   = $username . '>'; //orig
         html = "<div style='clear:both'>" +
           "<div style='float:left;width:100px'>" + command.commandName + "</div>" +
           "<div style='float:left;width:250px'>" + command.syntax + "</div>" +
-          "<div style='float:left;width:500px'>" + command.description + "</div>" +
+          "<div style='float:left;width:600px'>" + command.description + "</div>" +
           "<div style='float:left;width:200px'>" + command.sample + "</div>" +
           "<br /></div>";
         $('#screen').append(html);
@@ -320,45 +326,39 @@ $prompt_label   = $username . '>'; //orig
     // ADDITIONAL FUNCTIONS FOR MP02
 
     function setCurrentDirectory(directory) {
-      console.log("CONSOLE: setting of current directory happening");
+
       if (directory != "..") {
         //Subdirectory
         if (directory != root_directory) {
-          console.log("CONSOLE: before current dir: "+ current_directory);
           current_directory += directory + "/";
-          console.log("CONSOLE: after current dir: "+ current_directory);
-          console.log("CONSOLE: before display dir: "+ display_directory);
+
           display_directory = directory;
-          console.log("CONSOLE: after display dir: "+ display_directory);
+
         }
         else {
           //Root directory
           current_directory = root_directory;
           display_directory = ""; //orig
-
-          //code below reflects actual terminal behavior
-          //display_directory = "C:\\xampp\\htdocs\\terminal-master\\file_directory";
-
         }
       }
       else{
         //Move one folder up
+
         var folders = current_directory.split("/");
-        folders.splice(-2, 2);
+
+        folders.splice(-2, 2); //negative means position at the end of the array
+
         display_directory = folders.slice(-1,1);
-        current_directory = folders.join("/");
+
+        current_directory = folders.join("/"); //The join() method joins the elements of an array into a string, and returns the string.
+
       }
-      
-      //print current directory
-      console.log("CONSOLE: after setting of current directory: " + current_directory);
     }
 
     function ls(){
 
       var directory = current_directory; //transfer current directory to directory variable
-      console.log("CONSOLE: initial ls call of current directory: " + directory);
       
-
           /*** 
            * @TODO: If calling ls inside a subdirectory, need to determine current directory
            * Save current directory when doing a cd (change directory)
@@ -378,7 +378,7 @@ $prompt_label   = $username . '>'; //orig
         data: {"directory": directory},
         success: function(result)
         {
-          $('#screen').append('<div> <?php echo $prompt_label;?>' + display_directory + '>ls ' + directory + '</div>');
+          $('#screen').append('<div> <?php echo $prompt_label;?>' + display_directory + '>ls ' + display_directory + '</div>'); //change it to display instead of directory.
           //$('#screen').append("<pre>" + result + "</pre><br/>");
 
           //print headers
@@ -395,6 +395,7 @@ $prompt_label   = $username . '>'; //orig
           var contentCount = 0 ;
           var diskUsedSpace = 0;
           var diskFreeSpace = 0;
+          var folderSize = 0;
           //print file content
           jQuery.each(result, function(index, file) 
           {
@@ -402,6 +403,7 @@ $prompt_label   = $username . '>'; //orig
             if(file.name==undefined) {
               diskUsedSpace = result[0];
               diskFreeSpace = result[1];
+              folderSize = result[2];
             }
             else {
               html = "<div style='clear:both'>" +
@@ -417,10 +419,11 @@ $prompt_label   = $username . '>'; //orig
               contentCount++;
               diskUsedSpace = file.diskUsedSpace;
               diskFreeSpace = file.diskFreeSpace;
+              folderSize = file.folderSize;
             }
           }); //jQuery Each
 
-          var diskSizeInfo = "<div style='float:left;width:25%'>&nbsp;</div><div align=left style='float:left;width:75%'> <div>" + contentCount + " Item(s) </div> <div> " + diskUsedSpace + " bytes used </div><div>" + diskFreeSpace + " bytes free </div>" +
+          var diskSizeInfo = "<div style='float:left;width:25%'>&nbsp;</div><div align=left style='float:left;width:75%'> <div>" + contentCount + " Item(s) \t Size: "  + folderSize + "  </div> <div> " + diskUsedSpace + " bytes used </div><div>" + diskFreeSpace + " bytes free </div>" +
             "</div>";
           $('#screen').append(diskSizeInfo);
         }
@@ -433,7 +436,7 @@ $prompt_label   = $username . '>'; //orig
     //@TODO: Used to move the file
     function rn(arguments) {
 
-      //need revison since what if the first file has a space. please see revision below
+      //need to be revised since what if the first file has a space
       /*
       var files = arguments.split(" "), 
         new_file,
@@ -459,7 +462,7 @@ $prompt_label   = $username . '>'; //orig
           //dataType: "html",
           dataType: "json",
           data: {
-            'directory': current_directory,
+            'currentDirectory': current_directory,
             "old_file": files[0],
             "new_file": files[1]
           },
@@ -467,10 +470,17 @@ $prompt_label   = $username . '>'; //orig
 
             var message;
 
-            if (success) {
+            if (success===true) {
               message = "Successfully renamed file/directory";
-            } else {
+            } 
+            else if(success===false) {
               message = "Rename file/directory failed";
+            }
+            else if(success== -2) {
+              message = "There is already a file with the same name in this location. A duplicate file is created instead.";
+            }
+            else if(success== -3) {
+              message = "Source file does not exist. A new file is created instead.";
             }
 
             $('#screen').append('<div style="clear:both">' + message + '</div>');
@@ -483,13 +493,95 @@ $prompt_label   = $username . '>'; //orig
       }
     }
 
+    //move a file
+     function mv(arguments) {
+      $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '>mv ' + arguments + '</div>');
+
+      var data = [];
+      //convert all slashes in arguments to be /
+      arguments = arguments.replace(/\\/g,"/"); //g for gloabl = all instances
+
+
+      var divider = arguments.match("\\.[A-Za-z]{3,4}\\s[\\w\\/]+"); //
+
+
+      if(divider!=null){
+          var delimiter = divider[0].replace(" ", " /");
+          //correct the arguments:
+          arguments = arguments.replace(divider, delimiter);
+
+          data = arguments.split(" /");
+      }
+      else {
+        //go to else error below
+
+      }
+
+      if (data.length == 2) {
+        //get file to be moved:
+        var fileTobeMoved = data[0].substring(data[0].lastIndexOf("/")+1);
+
+        if(fileTobeMoved.match("[^*|\"<>?]+\.[A-Za-z]{3,4}")){
+          data.push(fileTobeMoved);
+
+          $.ajax({
+          type: 'POST',
+          url: '/terminal-master/mv.php',
+          //dataType: "html",
+          dataType: "json",
+          data: {
+            "currentDirectory": current_directory,
+            "sourceDirFile": data[0],
+            "destDirFile": data[1],
+            "file": data[2],
+          },
+          success: function(success) {
+
+            var message;
+
+            if (success===true || success===1) {
+              message = "Successfully moved file";
+            } 
+            else if(success===false) {
+              message = "Moving of file failed. Please check both source and destination paths.";
+            }
+            else if(success == -2) {
+              message = "Moving of file failed. There is no file specified in the source parameter.";
+            }
+            else if(success == -3) {
+              message = "Moving of file failed. Source file does not exist.";
+            }
+            else if(success == -4) {
+              message = "Moving of file failed. Target destination does not exist.";
+            }
+            else if(success == -5) {
+              message = "Moving of file failed. There is no file specified in the destination parameter.";
+            }
+            else if(success == -6) {
+              message = "There is already a file with the same name in the target location. A duplicate file is created instead.";
+            }
+
+            $('#screen').append('<div style="clear:both">' + message + '</div>');
+          }
+          
+          }); //ajax
+        }
+        else {
+          $('#screen').append('<div style="clear:both"> Invalid filename. Please make sure that you entered the syntax correctly: mv &lt;source dir/file&gt; &lt;dest dir/file&gt;</div>');
+        }
+      }
+      else {
+        $('#screen').append('<div style="clear:both"> Usage: mv &lt;file-path&gt; &lt;new-file-path&gt;</div>');
+      }
+    }
+
+
     //Remove file/directory
     function rm(file) 
     {
       $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '>rm ' + file + '</div>');
 
-      if (file != "") 
-      {
+      if (file != "") {
 
         $.ajax({
           type: 'POST',
@@ -497,17 +589,17 @@ $prompt_label   = $username . '>'; //orig
           //dataType: "html",
           dataType: "json",
           data: {"file": file, 'directory': current_directory},
-          success: function(success) 
-          {
-            var message = "default";
+          success: function(success) {
+            var message;
 
-            if (success) 
-            {
-              message = "Successfully deleted file/directory";
-            } 
-            else 
-            {
+            if (success ===true) {
+              message = "Successfully deleted file.";
+            }
+            else if (success === false) {
               message = "Delete failed";
+            }
+            else if (success == 2) {
+              message = "Successfully deleted directory.";
             }
 
             $('#screen').append('<div style="clear:both">' + message + '</div>');
@@ -523,8 +615,6 @@ $prompt_label   = $username . '>'; //orig
 
     function cd(directory){ //directory passed here is the succeeding string
 
-      console.log("CONSOLE: initial cd call of cd input: " + directory);
-      console.log("CONSOLE: initial cd call of current directory: " + current_directory);
 
       $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?>' + display_directory + '>cd ' + directory + '</div>');
       $.ajax({
@@ -532,7 +622,8 @@ $prompt_label   = $username . '>'; //orig
           url: '/terminal-master/cd.php',
           //dataType: "html",
           dataType: "json",
-          data: {'file': directory, 'directory': current_directory},
+          data: {'newDirectory': directory, 
+                 "currentDirectory": current_directory},
           success: function(success) {
 
             var message;
@@ -544,11 +635,8 @@ $prompt_label   = $username . '>'; //orig
             else {
               setCurrentDirectory(directory);
             }
-
-            
-          }
-          
-        });
+          } //success function
+        }); //ajax call
     }
 
     // The File manager should be able to duplicate a file in the same directory 
@@ -561,30 +649,26 @@ $prompt_label   = $username . '>'; //orig
       arguments = arguments.replace(/\\/g,"/"); //g for gloabl = all instances
 
 
-      var splitterIndex = arguments.indexOf(" /");
-      console.log("splitterIndex : " + splitterIndex);
-      if(splitterIndex>0) {
-        data = arguments.split(" /");
-      }
-      else {
-        //correct the dest path
-        var needsSlash = arguments.match("\\.[A-Za-z]{3,4}\\s[\\w]+"); //
-        console.log("needsSlash = "  + needsSlash); //is an array
-        if(needsSlash===null){
-          //directory to be copied.
-        }
-        else {
-          var correctedPart = needsSlash[0].replace(" ", " /");
+      var divider = arguments.match("\\.[A-Za-z]{3,4}\\s[\\w\\/]+"); //
+
+
+      if(divider!=null){
+          var delimiter = divider[0].replace(" ", " /");
           //correct the arguments:
-          arguments = arguments.replace(needsSlash, correctedPart);
+          arguments = arguments.replace(divider, delimiter);
 
           data = arguments.split(" /");
-        }
+
       }
+      else {
+        //go to else error below
+
+      }
+
 
       if (data.length == 2) {
 
-        //parsing on file to be copied:
+        //get file to be copied:
         var fileTobeCopied = data[0].substring(data[0].lastIndexOf("/")+1);
 
         if(fileTobeCopied.match("[^*|\"<>?]+\.[A-Za-z]{3,4}")){
@@ -597,7 +681,7 @@ $prompt_label   = $username . '>'; //orig
           //dataType: "html",
           dataType: "json",
           data: {
-            "directory": current_directory,
+            "currentDirectory": current_directory,
             "sourceDirFile": data[0],
             "destDirFile": data[1],
             "file": data[2],
@@ -606,7 +690,7 @@ $prompt_label   = $username . '>'; //orig
 
             var message;
 
-            if (success===true) {
+            if (success===true || success===1) {
               message = "Successfully copied file";
             } 
             else if(success===false) {
@@ -619,10 +703,10 @@ $prompt_label   = $username . '>'; //orig
               message = "Copying of file failed. Source to be copied does not exist!";
             }
             else if(success == -4) {
-              message = "Copying of file failed. Target Destination has wrong syntax: has no file.";
+              message = "Copying of file failed. Target Destination is invalid.";
             }
             else if(success == -5) {
-              message = "Copying of file failed. Target Destination does not exist!";
+              message = "Copying of file failed. Target Destination has no file specified.";
             }
 
             $('#screen').append('<div style="clear:both">' + message + '</div>');
@@ -647,13 +731,26 @@ $prompt_label   = $username . '>'; //orig
 
     //}
 
+    function edit(file){
+      //clear the screen
+      $('#screen').empty();
+      //set the mode = command
+      var mode = 1; //command 0 for insert/edit
+      //load the file content
+      var directory = current_directory; //transfer current directory to directory variable
 
-    function file_info_owner() {
-
-    }
-
-    function edit_content(){
-
+      //Ajax call to get list of file of current directory from server-side
+      /*$.ajax({
+        type: 'POST',
+        url: '/terminal-master/edit.php',
+        //dataType: "html",
+        dataType: "json",
+        data: {"directory": directory, "file": file, "mode" : $mode},
+        success: function(result)
+        {
+          
+        }
+      });*/
     }
 
     

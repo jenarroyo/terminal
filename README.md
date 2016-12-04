@@ -1,5 +1,5 @@
 # terminal
-
+<!--
 Dev notes in console.php:
 
 Accomplishments ao 11/26/2016:
@@ -48,3 +48,26 @@ if file to be copied is existing
 if target destination is valid
 if source param is a directory
 if dest param is a directory
+
+
+Accomplishments ao 12/04/2016:
+
+modified cd.php to be simpler in terms of logic. removed the file checking and edited the ajax call in console
+FIX: renaming something that has an existing name already -> create a new duplicate and delete old file
+FIX: renaming something that doesnt exist -> create new file
+added a date modification change after renaming a file or creating a duplicate.
+FIX: change date modified in renaming a file
+FIX: changed the logic of copy to have incremental numbers (applicable to rename also when file is existing)
+new function : move. used renaming as base function
+added current directory file size display
+new functionality: create a new file for rename when source file does not exist
+improved logic on cp.php by handling different scenarios. same as mv.php.
+enhanced messaging to indicate what really happened in all functions (e.g. rm)
+
+pending tasks:
+show of transaction status after commands
+deleting a directory
+copying a directory
+editing a file
+running a c program
+ -->
