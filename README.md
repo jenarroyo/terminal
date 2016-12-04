@@ -1,5 +1,5 @@
 # terminal
-<!--
+
 Dev notes in console.php:
 
 Accomplishments ao 11/26/2016:
@@ -48,4 +48,3 @@ if file to be copied is existing
 if target destination is valid
 if source param is a directory
 if dest param is a directory
- -->
