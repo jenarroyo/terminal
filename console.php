@@ -84,9 +84,9 @@ $prompt_label   = $username . '>'; //orig
       current_directory = root_directory, //set the root directory as current directory
       display_directory = ''; //for string version of current directory?
 
-    // var root_directory = "C:\\xampp\\htdocs\\terminal-master\\root_directory",
-    //   current_directory = root_directory,
-    //   display_directory = "C:\\xampp\\htdocs\\terminal-master\\root_directory\>";
+    //var root_directory = "C:\\xampp\\htdocs\\terminal-master\\root_directory",
+    //current_directory = root_directory,
+    //display_directory = "C:\\xampp\\htdocs\\terminal-master\\root_directory\>";
 
     // Always focus on the commandline
     $(document).ready(function() {
@@ -154,10 +154,12 @@ $prompt_label   = $username . '>'; //orig
             command_exit();
           }
           else if (command == "ls") {//to show list of files
-              if(succeeding_string.length>0){
+              if(succeeding_string.length>0)
+              {
                   invalid(value); //invalid command
               }
-              else{
+              else
+              {
                 ls();               
               }
           }  
@@ -178,7 +180,10 @@ $prompt_label   = $username . '>'; //orig
           }
           else if (command == "vimte") {//to edit a file
             edit(succeeding_string);
-          }          
+          }
+          else if (command == "run") {//to run a program file
+            run(succeeding_string);
+          }           
           else {
             invalid(value); //invalid command
           };
@@ -314,48 +319,46 @@ $prompt_label   = $username . '>'; //orig
             hours = hours - 12;
             ampm = 'pm'
         }
-
         return hours + ':' + mins + ':' + secs + ampm;
     }
 
-    function time_pad(i) {
-        if(i < 10) return "0" + i;
-        else return i;
+    function time_pad(i)
+    {
+      if(i < 10) return "0" + i;
+      else return i;
     }
-    
+
     // ADDITIONAL FUNCTIONS FOR MP02
-
-    function setCurrentDirectory(directory) {
-
-      if (directory != "..") {
+    function setCurrentDirectory(directory) 
+    {
+      if (directory != "..") 
+      {
         //Subdirectory
         if (directory != root_directory) {
           current_directory += directory + "/";
 
           display_directory = directory;
-
         }
-        else {
+        else 
+        {
           //Root directory
           current_directory = root_directory;
           display_directory = ""; //orig
         }
       }
-      else{
+      else
+      {
         //Move one folder up
-
         var folders = current_directory.split("/");
-
         folders.splice(-2, 2); //negative means position at the end of the array
-
         display_directory = folders.slice(-1,1);
-
-        current_directory = folders.join("/"); //The join() method joins the elements of an array into a string, and returns the string.
-
+        current_directory = folders.join("/");
+        //The join() method joins the elements of an array into a string, and returns the string.
       }
     }
 
-    function ls(){
+    function ls()
+    {
 
       var directory = current_directory; //transfer current directory to directory variable
       
@@ -383,13 +386,13 @@ $prompt_label   = $username . '>'; //orig
 
           //print headers
           var html = "<div style='clear:both'>" +
-              "<div style='float:left;width:150px'>Name</div>" +
-              //"<div style='float:left;width:150px'>Owner</div>" +
-              "<div style='float:left;width:80px'>Size</div>" +
-              "<div style='float:left;width:80px'>%</div>" +
-              "<div style='float:left;width:200px'>Created</div>" +
-              "<div style='float:left;width:200px'>Modified</div>" +
-              "</div>";
+                      "<div style='float:left;width:150px'>Name</div>" +
+                      //"<div style='float:left;width:150px'>Owner</div>" +
+                      "<div style='float:left;width:80px'>Size</div>" +
+                      "<div style='float:left;width:80px'>%</div>" +
+                      "<div style='float:left;width:200px'>Created</div>" +
+                      "<div style='float:left;width:200px'>Modified</div>" +
+                      "</div>";
           $('#screen').append(html);
 
           var contentCount = 0 ;
@@ -400,12 +403,14 @@ $prompt_label   = $username . '>'; //orig
           jQuery.each(result, function(index, file) 
           {
             //if there are no files in the directory, just get the 2 info needed:
-            if(file.name==undefined) {
+            if(file.name==undefined) 
+            {
               diskUsedSpace = result[0];
               diskFreeSpace = result[1];
               folderSize = result[2];
             }
-            else {
+            else
+            {
               html = "<div style='clear:both'>" +
                 "<div style='float:left;width:150px'>" + file.name + "</div>" +
                 //"<div style='float:left;width:150px'>" + file.owner + "</div>" +
@@ -430,12 +435,8 @@ $prompt_label   = $username . '>'; //orig
       });
     }
 
-
-    //Used to edit file name
-    //@TODO: Used to edit extension
-    //@TODO: Used to move the file
-    function rn(arguments) {
-
+    function rn(arguments) 
+    {
       //need to be revised since what if the first file has a space
       /*
       var files = arguments.split(" "), 
@@ -452,9 +453,9 @@ $prompt_label   = $username . '>'; //orig
       files.push(oldfile);
       files.push(newfile);
 
-
       $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '>rn ' + arguments + '</div>');
-      if (files.length == 2) {
+      if (files.length == 2)
+      {
 
         $.ajax({
           type: 'POST',
@@ -467,9 +468,7 @@ $prompt_label   = $username . '>'; //orig
             "new_file": files[1]
           },
           success: function(success) {
-
             var message;
-
             if (success===true) {
               message = "Successfully renamed file/directory";
             } 
@@ -482,46 +481,47 @@ $prompt_label   = $username . '>'; //orig
             else if(success== -3) {
               message = "Source file does not exist. A new file is created instead.";
             }
-
             $('#screen').append('<div style="clear:both">' + message + '</div>');
           }
-          
         });
       }
-      else {
+      else 
+      {
         $('#screen').append('<div style="clear:both"> Usage: rn &lt;old-file-name&gt; &lt;new-file-name&gt;</div>');
       }
     }
 
     //move a file
-     function mv(arguments) {
+    function mv(arguments)
+    {
       $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '>mv ' + arguments + '</div>');
 
       var data = [];
       //convert all slashes in arguments to be /
       arguments = arguments.replace(/\\/g,"/"); //g for gloabl = all instances
 
-
       var divider = arguments.match("\\.[A-Za-z]{3,4}\\s[\\w\\/]+"); //
 
-
-      if(divider!=null){
+      if(divider!=null)
+      {
           var delimiter = divider[0].replace(" ", " /");
           //correct the arguments:
           arguments = arguments.replace(divider, delimiter);
 
           data = arguments.split(" /");
       }
-      else {
+      else
+      {
         //go to else error below
-
       }
 
-      if (data.length == 2) {
+      if (data.length == 2) 
+      {
         //get file to be moved:
         var fileTobeMoved = data[0].substring(data[0].lastIndexOf("/")+1);
 
-        if(fileTobeMoved.match("[^*|\"<>?]+\.[A-Za-z]{3,4}")){
+        if(fileTobeMoved.match("[^*|\"<>?]+\.[A-Za-z]{3,4}"))
+        {
           data.push(fileTobeMoved);
 
           $.ajax({
@@ -566,11 +566,13 @@ $prompt_label   = $username . '>'; //orig
           
           }); //ajax
         }
-        else {
+        else 
+        {
           $('#screen').append('<div style="clear:both"> Invalid filename. Please make sure that you entered the syntax correctly: mv &lt;source dir/file&gt; &lt;dest dir/file&gt;</div>');
         }
       }
-      else {
+      else 
+      {
         $('#screen').append('<div style="clear:both"> Usage: mv &lt;file-path&gt; &lt;new-file-path&gt;</div>');
       }
     }
@@ -581,7 +583,8 @@ $prompt_label   = $username . '>'; //orig
     {
       $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '>rm ' + file + '</div>');
 
-      if (file != "") {
+      if (file != "")
+      {
 
         $.ajax({
           type: 'POST',
@@ -613,9 +616,8 @@ $prompt_label   = $username . '>'; //orig
       }
     }
 
-    function cd(directory){ //directory passed here is the succeeding string
-
-
+    function cd(directory)
+    { //directory passed here is the succeeding string
       $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?>' + display_directory + '>cd ' + directory + '</div>');
       $.ajax({
           type: 'POST',
@@ -641,97 +643,83 @@ $prompt_label   = $username . '>'; //orig
 
     // The File manager should be able to duplicate a file in the same directory 
       // and the name would immediately have a (1) or (2) or “Copy of” prefix.
-    function cp(arguments) { 
-
+    function cp(arguments) 
+    { 
       $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '> cp ' + arguments + '</div>');
       var data = [];
       //convert all slashes in arguments to be /
       arguments = arguments.replace(/\\/g,"/"); //g for gloabl = all instances
 
-
       var divider = arguments.match("\\.[A-Za-z]{3,4}\\s[\\w\\/]+"); //
 
-
-      if(divider!=null){
+      if(divider!=null)
+      {
           var delimiter = divider[0].replace(" ", " /");
           //correct the arguments:
           arguments = arguments.replace(divider, delimiter);
 
           data = arguments.split(" /");
-
       }
-      else {
+      else
+      {
         //go to else error below
-
       }
 
-
-      if (data.length == 2) {
-
-        //get file to be copied:
+      if (data.length == 2)
+      { //get file to be copied:
         var fileTobeCopied = data[0].substring(data[0].lastIndexOf("/")+1);
 
-        if(fileTobeCopied.match("[^*|\"<>?]+\.[A-Za-z]{3,4}")){
+        if(fileTobeCopied.match("[^*|\"<>?]+\.[A-Za-z]{3,4}"))
+        {
           data.push(fileTobeCopied);
         }
 
-        $.ajax({
-          type: 'POST',
-          url: '/terminal-master/cp.php',
-          //dataType: "html",
-          dataType: "json",
-          data: {
-            "currentDirectory": current_directory,
-            "sourceDirFile": data[0],
-            "destDirFile": data[1],
-            "file": data[2],
-          },
-          success: function(success) {
+          $.ajax({
+            type: 'POST',
+            url: '/terminal-master/cp.php',
+            //dataType: "html",
+            dataType: "json",
+            data: {
+              "currentDirectory": current_directory,
+              "sourceDirFile": data[0],
+              "destDirFile": data[1],
+              "file": data[2],
+            },
+            success: function(success){
+              var message;
 
-            var message;
+              if (success===true || success===1) {
+                message = "Successfully copied file";
+              } 
+              else if(success===false) {
+                message = "Copying of file failed. Please check both source and destination paths.";
+              }
+              else if(success == -2) {
+                message = "Copying failed. Copying of directory is not allowed!";
+              }
+              else if(success == -3) {
+                message = "Copying of file failed. Source to be copied does not exist!";
+              }
+              else if(success == -4) {
+                message = "Copying of file failed. Target Destination is invalid.";
+              }
+              else if(success == -5) {
+                message = "Copying of file failed. Target Destination has no file specified.";
+              }
 
-            if (success===true || success===1) {
-              message = "Successfully copied file";
-            } 
-            else if(success===false) {
-              message = "Copying of file failed. Please check both source and destination paths.";
+              $('#screen').append('<div style="clear:both">' + message + '</div>');
             }
-            else if(success == -2) {
-              message = "Copying failed. Copying of directory is not allowed!";
-            }
-            else if(success == -3) {
-              message = "Copying of file failed. Source to be copied does not exist!";
-            }
-            else if(success == -4) {
-              message = "Copying of file failed. Target Destination is invalid.";
-            }
-            else if(success == -5) {
-              message = "Copying of file failed. Target Destination has no file specified.";
-            }
-
-            $('#screen').append('<div style="clear:both">' + message + '</div>');
-          }
-          
-        });
+            
+          });
       }
-      else {
+      else 
+      {
         $('#screen').append('<div style="clear:both"> Usage: cp &lt;source dir/file&gt; &lt;dest dir/file&gt;</div>');
       }
     }
 
-
-    //function current_directory(){
-      // //current directory
-      // echo getcwd() . "\n";
-
-      // chdir('cvs');
-
-      // //current directory
-      // echo getcwd() . "\n";
-
-    //}
-
-    function edit(file){
+    function edit(file)
+    {
       //clear the screen
       $('#screen').empty();
       //set the mode = command
@@ -753,6 +741,11 @@ $prompt_label   = $username . '>'; //orig
       });*/
     }
 
+    function run(succeeding_string)
+    {      
+      //First is to get the path of the file or the file must be in the same directory
+      // sample run command is "run jenjen.c"
+    }
     
     </script>
 
