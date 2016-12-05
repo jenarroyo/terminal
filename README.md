@@ -1,5 +1,5 @@
 # terminal
-<!--
+
 Dev notes in console.php:
 
 Accomplishments ao 11/26/2016:
@@ -70,4 +70,3 @@ deleting a directory
 copying a directory
 editing a file
 running a c program
- -->
