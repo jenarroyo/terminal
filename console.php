@@ -744,8 +744,44 @@ $prompt_label   = $username . '>'; //orig
     function run(succeeding_string)
     {      
       //First is to get the path of the file or the file must be in the same directory
-      // sample run command is "run jenjen.c"
-    }
+      // sample run command syntax is "run jenjen.c"
+      // made a folder prog_c on root directory
+      // folder contains c program for testing
+
+      $('#screen').append('<div style="clear:both"> <?php echo $prompt_label;?> ' + display_directory + '>rm ' + file + '</div>');
+
+      if (file != "")
+      {
+
+        $.ajax({
+          type: 'POST',
+          url: '/terminal-master/run.php',
+          //dataType: "html",
+          dataType: "json",
+          data: {"file": file, 'directory': current_directory},
+          success: function(success) {
+            var message;
+
+            if (success ===true) {
+              message = "Successfully run file.";
+            }
+            else if (success === false) {
+              message = "Run failed";
+            }
+            else if (success == 2) {
+              message = "Successfully run file.";
+            }
+
+            $('#screen').append('<div style="clear:both">' + message + '</div>');
+          }
+          
+        });
+      }
+      else 
+      {
+        $('#screen').append('<div style="clear:both"> Please provide file to be run </div>');
+      }
+     }
     
     </script>
 
