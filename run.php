@@ -10,16 +10,35 @@ if (isset($_POST['file']))
     $file .= $_POST['file'];
 }
 
-$success = false;
-if (isset($_POST['file'])) 
-{
-    //get the "file" from the directory
-    $file = $directory . $_POST['file'];
+$success = true;
 
-    $output = shell_exec($file);
-    return $output;
+// wala pa laman
+//need to get the c file
+// var_dump($_POST);
 
-}
+// if (isset($_POST['file'])) 
+// {
+//     //get the "file" from the directory
+//     $file = $directory . $_POST['file'];
+
+//     $output = shell_exec($file);
+//     return $output;
+
+// }
+// var_dump($output);
+// print($output);
+
+
+// testing output
+    // $output = shell_exec('hello.c');
+    $output = exec('hello.c');
+    // echo $output;
+    var_dump($output);
+    // printf($output);
+
+    // echo '<pre>';
+    // print_r($output);
+    // echo '</pre>';
 
 echo json_encode($success);
 
