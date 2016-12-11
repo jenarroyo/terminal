@@ -1,7 +1,6 @@
 <?php
 
-function getFormatSizeUnit($bytes)
-{
+function getFormatSizeUnit($bytes) {
     $kb = 1024;
     $mb = $kb * 1024;
     $gb = $mb * 1024;
@@ -27,29 +26,24 @@ function getFormatSizeUnit($bytes)
     }
 }
 
-function getFolderSize($dir)
-{
+function getFolderSize($dir){
     $count_size = 0;
     $count = 0;
     $dir_array = scandir($dir);
-        foreach($dir_array as $key=>$filename)
-        {
-            if($filename!=".." && $filename!=".")
-            {
-                if(is_dir($dir."/".$filename))
-                {
-                    $new_foldersize = getFolderSize($dir."/".$filename);
-                    $count_size = $count_size+ $new_foldersize;
-                }
-                else if(is_file($dir."/".$filename))
-                {
-                  $count_size = $count_size + filesize($dir."/".$filename);
-                  $count++;
-                }
+      foreach($dir_array as $key=>$filename){
+        if($filename!=".." && $filename!="."){
+           if(is_dir($dir."/".$filename)){
+              $new_foldersize = getFolderSize($dir."/".$filename);
+              $count_size = $count_size+ $new_foldersize;
+            }else if(is_file($dir."/".$filename)){
+              $count_size = $count_size + filesize($dir."/".$filename);
+              $count++;
             }
-        }
+       }
+     }
     return $count_size;
 }
+
 
 $files = array(); //placeholder for files
 
@@ -65,14 +59,14 @@ $files = array(); //placeholder for files
 //this code is more efficient version of the above. they are just the same
 $directory = __DIR__. "/root_directory/";  //C:\xampp\htdocs\terminal-master/root_directory/
 
-
-if (isset($_POST['directory'])) 
-{ //this is not true if root directory since there is no need to modify.
+if (isset($_POST['directory'])) { //this is not true if root directory since there is no need to modify.
     $directory .= $_POST['directory']; 
 }
 
+
 //Get files
 $files = scandir($directory, SCANDIR_SORT_NONE); //gets the List of files and directories inside the specified path
+
 
 //Remove . and .. from list
 $files = array_diff($files, array(".", ".."));
@@ -86,11 +80,9 @@ $diskFreeSpace = getFormatSizeUnit(disk_free_space (__DIR__));
 $diskUsedSpace = getFormatSizeUnit(disk_total_space(__DIR__)-disk_free_space(__DIR__));
 
 $folderSize = getFormatSizeUnit(getFolderSize($directory));
-
 //BONUS: Get additional info
 $results = array();
-foreach ($files as $file) 
-{
+foreach ($files as $file) {
     $abs_path = $directory.$file; //C:\xampp\htdocs\terminal-master/root_directory/dog.txt
 
     $percentage = round(filesize($abs_path) / disk_total_space($directory), 2) . "%";
@@ -112,11 +104,11 @@ foreach ($files as $file)
     //[] means push - put the given argument as a new element on the end of the array
 }
 //handling if there are no files, must still pass the disk used space and free space
-if(count($results)==0)
-{
+if(count($results)==0) {
     $results[] = $diskUsedSpace;
     $results[] = $diskFreeSpace;
     $results[] = $folderSize;
 }
 
 echo json_encode($results, JSON_PRETTY_PRINT); //Returns the JSON representation of a value
+

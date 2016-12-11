@@ -183,7 +183,16 @@ color: white;
   background-color: #424242;
   color: white;
   outline: none;
-  width: 90%;
+  width: 40%; /*----//needs to be flexible----*/
+}
+
+
+#edit_textarea{
+  border: none;
+  border-color: transparent;
+  background-color: #424242 !important;
+  color: white !important;
+  outline: none !important;
 }
 
 /*----------FOOTER----------*/

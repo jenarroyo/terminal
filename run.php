@@ -1,47 +1,42 @@
 <?php 
+include 'ChromePhp.php';
 // RUN A C PROGRAM
 // using execute function
-
+ChromePhp::log("Run Entrance.");
 //Set directory
 $directory = dirname(__FILE__) . "/root_directory/";
 
-if (isset($_POST['file'])) 
-{
-    $file .= $_POST['file'];
+$success = false;
+$output = null;
+if (isset($_POST['file']) && isset($_POST['currentDirectory'])) {
+
+	if(is_dir($directory . $_POST['currentDirectory'] . $_POST['file'])) {
+        $directory = $directory . $_POST['currentDirectory'] . $_POST['file'];
+        ChromePhp::log("Input is a directory1: $directory");
+        $success = false;
+    }
+    else if (is_file($directory . $_POST['currentDirectory'] . $_POST['file'])) {
+        $directory = $directory . $_POST['currentDirectory'] . $_POST['file'];
+        ChromePhp::log("Input is a file1: $directory");
+        $output = exec($directory);
+        $success = true;
+    }
+    else if (is_dir($directory . $_POST['file'])) {
+        $directory = $directory . $_POST['file'];
+        ChromePhp::log("Input is a directory2: $directory");
+        $success = false;
+    }
+    else if (is_file($directory . $_POST['file'])) {
+        $directory = $directory . $_POST['file'];
+        ChromePhp::log("Input is a file2: $directory.");
+        $output = exec($directory);
+        $success = true;
+    }
+    else {
+        ChromePhp::log("File is not found");
+        $success = false; //file is not found.
+    }
+
 }
 
-$success = true;
-
-// wala pa laman
-//need to get the c file
-// var_dump($_POST);
-
-// if (isset($_POST['file'])) 
-// {
-//     //get the "file" from the directory
-//     $file = $directory . $_POST['file'];
-
-//     $output = shell_exec($file);
-//     return $output;
-
-// }
-// var_dump($output);
-// print($output);
-
-
-// testing output
-    // $output = shell_exec('hello.c');
-    $output = exec('hello.c');
-    // echo $output;
-    var_dump($output);
-    // printf($output);
-
-    // echo '<pre>';
-    // print_r($output);
-    // echo '</pre>';
-
 echo json_encode($success);
-
-// references
-// Execute command via shell and return the complete output as a string
-// http://stackoverflow.com/questions/5555912/call-a-c-program-from-php-and-read-program-output
